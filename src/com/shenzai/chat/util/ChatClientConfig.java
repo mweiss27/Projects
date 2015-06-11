@@ -1,4 +1,4 @@
-package com.shenzai.chat.config;
+package com.shenzai.chat.util;
 
 import java.awt.Font;
 
@@ -19,7 +19,7 @@ public class ChatClientConfig {
 		return baseFont.deriveFont(style);
 	}
 	
-	public static final Font getFont(final int style, final int size) {
+	public static final Font getFont(final int style, final float size) {
 		return baseFont.deriveFont(style, size);
 	}
 }

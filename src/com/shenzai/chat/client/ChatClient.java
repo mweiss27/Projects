@@ -15,87 +15,86 @@ import java.util.List;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import com.shenzai.chat.config.ChatClientConfig;
+import com.shenzai.chat.message.ChatMessage;
 import com.shenzai.chat.message.Message;
 import com.shenzai.chat.message.MessageReceivedEvent;
+import com.shenzai.chat.message.SystemMessage;
 import com.shenzai.io.Log;
 
 public class ChatClient {
 
 	private int id; //assigned by the server
+	private String name;
 	private Socket socket;
 	private DataOutputStream writeOut; //messages TO the server
 	private DataInputStream readIn; //messages FROM the server
 
-	private BlockingQueue<Message> messagesToSend = new ArrayBlockingQueue<>(10);
+	private BlockingQueue<ChatMessage> messagesToSend = new ArrayBlockingQueue<>(10);
 	private volatile boolean active = true;
 
 	private Thread inputThread, outputThread;
-	
-	private MessageReceivedEvent messageReceivedEvent;
 
-	public ChatClient(final int port) {
-		try {
-			this.socket = new Socket(InetAddress.getLocalHost(), ChatClientConfig.PORT);
-			Log.info("Connected to server. Requesting a Client Id...");
-			this.writeOut = new DataOutputStream(this.socket.getOutputStream());
-			this.readIn = new DataInputStream(this.socket.getInputStream());
-			
-			this.id = this.readIn.readInt();
-			Log.info("Client Id received: " + this.id);
-			
-			this.outputThread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					while (ChatClient.this.active) {
-						try {
-							
-							final Message next = ChatClient.this.messagesToSend.take();
-							if (next != null) {
-								Log.info("Sending message: " + next);
-								ChatClient.this.send(next);
-							}
-							
-						} catch (final Exception any) {
-							any.printStackTrace();
+	private MessageReceivedEvent onChatMessageReceived;
+	private MessageReceivedEvent onSystemMessageReceived;
+
+	public ChatClient(final int port, final String name) throws IOException {
+		this.socket = new Socket(InetAddress.getLocalHost(), port);
+		this.name = name;
+		Log.info("[Client] Connected to server. Requesting a Client Id...");
+		this.writeOut = new DataOutputStream(this.socket.getOutputStream());
+		this.readIn = new DataInputStream(this.socket.getInputStream());
+
+		this.writeOut.writeUTF(name);
+
+		this.id = this.readIn.readInt();
+		Log.info("[Client] Client Id received: " + this.id);
+
+		this.outputThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (ChatClient.this.active) {
+					try {
+
+						final ChatMessage next = ChatClient.this.messagesToSend.take();
+						if (next != null) {
+							Log.info("[Client] Sending message: " + next);
+							ChatClient.this.send(next);
 						}
+
+					} catch (final Exception any) {
+						any.printStackTrace();
 					}
 				}
-			});
+				Log.info("[Client] " + ChatClient.this.getName() + " no longer active. Ending outputThread.");
+			}
+		});
 
-			this.inputThread = new Thread(new Runnable() {
-				@Override
-				public void run() {
-					while (ChatClient.this.active) {
-						try {
-							final List<Byte> bytes = new ArrayList<>();
+		this.inputThread = new Thread(new Runnable() {
+			@Override
+			public void run() {
+				while (ChatClient.this.active) {
+					try {
+						byte[] buffer = new byte[1024];
+						int len;
+						do {
+							len = ChatClient.this.readIn.read(buffer);
 
-							byte[] buffer = new byte[1024];
-							int len;
-							do {
-								len = ChatClient.this.readIn.read(buffer);
-								for (final byte b : buffer) {
-									bytes.add(b);
-								}
-							} while (len >= 0);
-
-							byte[] fullMessage = new byte[bytes.size()];
-							for (int i = 0; i < fullMessage.length; i++) {
-								fullMessage[i] = bytes.get(i);
-							}
-
-							ChatClient.this.receive(fullMessage);
-
-						} catch (final Exception any) {
-							any.printStackTrace();
-						}
+							ChatClient.this.receive(buffer);
+						} while (len >= 0);
+					} catch (final Exception any) {
+						any.printStackTrace();
 					}
 				}
-			});
-
-		} catch (final IOException e) {
-			e.printStackTrace();
-		}
+				Log.info("[Client] " + ChatClient.this.getName() + " no longer active. Ending inputThread.");
+			}
+		});
+		
+		this.setOnSystemMessageReceived(new MessageReceivedEvent() {
+			@Override
+			public void messageReceived(Message message) {
+				Log.info(ChatClient.this.getName() + " received System Message:" + message.getMessage());
+			}
+		});
 	}
 
 	public void start() {
@@ -107,16 +106,20 @@ public class ChatClient {
 		this.messagesToSend.clear();
 		this.active = false;
 	}
-	
+
 	public int getId() {
 		return this.id;
+	}
+
+	public String getName() {
+		return this.name;
 	}
 
 	public void setId(final int id) {
 		this.id = id;
 	}
 
-	public void send(final Message message) {
+	public void send(final ChatMessage message) {
 		try {
 			final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -136,10 +139,16 @@ public class ChatClient {
 			final ObjectInputStream objectIn = new ObjectInputStream(in);
 
 			final Object readIn = objectIn.readObject();
-			if (readIn instanceof Message) {
-				final Message message = (Message) readIn;
-				if (this.messageReceivedEvent != null) {
-					this.messageReceivedEvent.messageReceived(message);
+			if (readIn instanceof ChatMessage) {
+				final ChatMessage message = (ChatMessage) readIn;
+				if (this.onChatMessageReceived != null) {
+					this.onChatMessageReceived.messageReceived(message);
+				}
+			}
+			else if (readIn instanceof SystemMessage) {
+				final SystemMessage message = (SystemMessage) readIn;
+				if (this.onSystemMessageReceived != null) {
+					this.onSystemMessageReceived.messageReceived(message);
 				}
 			}
 
@@ -147,9 +156,13 @@ public class ChatClient {
 			e.printStackTrace();
 		}
 	}
-	
-	public void setOnMessageReceived(final MessageReceivedEvent e) {
-		this.messageReceivedEvent = e;
+
+	public void setOnChatMessageReceived(final MessageReceivedEvent e) {
+		this.onChatMessageReceived = e;
+	}
+
+	public void setOnSystemMessageReceived(final MessageReceivedEvent e) {
+		this.onSystemMessageReceived = e;
 	}
 
 }
