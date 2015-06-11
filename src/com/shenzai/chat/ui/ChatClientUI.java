@@ -70,18 +70,12 @@ public class ChatClientUI extends JFrame {
 
 		gbc.insets = new Insets(0, 3, 0, 3);
 
-		gbc.anchor = GridBagConstraints.SOUTHEAST;
+		gbc.anchor = GridBagConstraints.EAST;
 		this.container.add(this.startServer, gbc);
 		gbc.gridx++;
-		gbc.anchor = GridBagConstraints.SOUTHWEST;
+		gbc.anchor = GridBagConstraints.WEST;
 		this.container.add(this.startClient, gbc);
 
-		try {
-			loadLoadingSprites();
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		
 		this.loadingGif = new JLabel(new ImageIcon((this.loadingSprites = loadLoadingSprites())[0]));
 		
 		this.connectingToServer = new JLabel("Connecting to server") {
@@ -129,22 +123,24 @@ public class ChatClientUI extends JFrame {
 		
 		GridBagConstraints gbc2 = new GridBagConstraints();
 		gbc2.gridx = gbc2.gridy = 0;
-		gbc.weightx = gbc2.weighty = 1D;
-		gbc2.anchor = GridBagConstraints.NORTH;
-		gbc2.gridwidth = GridBagConstraints.REMAINDER;
-		gbc2.gridy++;
+		gbc2.weightx = 1D;
 		gbc2.weighty = 0D;
+		gbc2.anchor = gbc2.NORTH;
+		
 		loadingPanel.add(Box.createVerticalStrut(15), gbc2);
 		gbc2.gridy++;
-		gbc2.weighty = 0D;
 		loadingPanel.add(this.connectingToServer, gbc2);
 		gbc2.gridy++;
 		loadingPanel.add(Box.createVerticalStrut(5), gbc2);
 		gbc2.gridy++;
+		gbc2.weighty = 1D;
 		loadingPanel.add(this.loadingGif, gbc2);
 		
-		gbc.weighty = 0D;
+		gbc.gridx = 0;
+		gbc.gridwidth = 2;
 		gbc.gridy++;
+		gbc.weighty = 0D;
+		gbc.anchor = gbc.NORTH;
 		this.container.add(loadingPanel, gbc);
 		
 		Executors.newSingleThreadExecutor().submit(new Runnable() {
