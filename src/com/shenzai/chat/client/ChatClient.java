@@ -87,10 +87,11 @@ public class ChatClient {
 						}
 
 					} catch (final Exception any) {
-						any.printStackTrace();
+						Log.err("[Client] Exception on outputThread for " + ChatClient.this.getName() + ": " + any.getMessage());
 					}
 				}
 				Log.info("[Client] " + ChatClient.this.getName() + " no longer active. Ending outputThread.");
+				System.exit(0);
 			}
 		});
 
@@ -108,28 +109,41 @@ public class ChatClient {
 							ChatClient.this.receive(buffer);
 						} while (len >= 0);
 					} catch (final Exception any) {
-						any.printStackTrace();
+						Log.err("[Client] Exception on inputThread for " + ChatClient.this.getName() + ": " + any.getMessage());
 					}
 				}
 				Log.info("[Client] " + ChatClient.this.getName() + " no longer active. Ending inputThread.");
+				System.exit(0);
 			}
 		});
 
 		this.setOnSystemMessageReceived(new MessageReceivedEvent() {
 			@Override
-			public void messageReceived(Message message) {
+			public void messageReceived(final Message message) {
 				Worker.execute(new Runnable() {
 					@Override
 					public void run() {
-						Log.info(ChatClient.this.getName() + " received System Message:" + message.getMessage());
-						if (message.getMessage().equals(ChatServer.SHUTDOWN_MESSAGE)) {
+						final SystemMessage systemMessage = (SystemMessage) message;
+						Log.info(ChatClient.this.getName() + " received System Message:" + systemMessage.getMessage());
+						if (systemMessage.getMessage().equals(ChatServer.SHUTDOWN_MESSAGE)) {
 							ChatClient.this.disconnect();
 						}
-						else if (message.getMessage().equals(ChatServer.REFRESH_USERS_MESSAGE)) {
+						else if (systemMessage.getMessage().equals(ChatServer.REFRESH_USERS_MESSAGE)) {
 							ChatClient.this.updateUserList();
 						}
+						else if (systemMessage.getMessage().contains("has connected")
+								|| systemMessage.getMessage().contains("has disconnected")) {
+							if (ChatClient.this.chatWindow.chatWindow.getText().trim().length() > 0) {
+								ChatClient.this.chatWindow.chatWindow.setText(
+										ChatClient.this.chatWindow.chatWindow.getText() + "\n");
+							}
+							ChatClient.this.chatWindow.chatWindow.setText(chatWindow.chatWindow.getText() + 
+									systemMessage.getMessage());
+							ChatClient.this.chatWindow.chatWindow.setCaretPosition(
+									ChatClient.this.chatWindow.chatWindow.getText().length());
+						}
 						else {
-							Log.err("Unknown SystemMessage: " + message.getMessage());
+							Log.err("Unknown SystemMessage: " + systemMessage.getMessage());
 						}
 					}
 				});
@@ -232,7 +246,12 @@ public class ChatClient {
 			final ObjectOutput objectOut = new ObjectOutputStream(out);
 			objectOut.writeObject(message);
 
-			this.writeOut.write(out.toByteArray());
+			if (!this.socket.isClosed() && !this.socket.isOutputShutdown()) {
+				this.writeOut.write(out.toByteArray());
+			}
+			else {
+				Log.err("[Client] socket is closed or output is shutdown for " + this.getName());
+			}
 
 		} catch (IOException e) {
 			e.printStackTrace();
@@ -254,7 +273,7 @@ public class ChatClient {
 						this.onChatMessageReceived.messageReceived(message);
 					}
 					else {
-						Log.err("Received a ChatMessage, but onChatMessageReceived is null");
+						Log.err("[Client] Received a ChatMessage, but onChatMessageReceived is null");
 					}
 				}
 				else if (readIn instanceof SystemMessage) {
@@ -263,7 +282,7 @@ public class ChatClient {
 						this.onSystemMessageReceived.messageReceived(message);
 					}
 					else {
-						Log.err("Received a SystemMessage, but onSystemMessageReceived is null");
+						Log.err("[Client] Received a SystemMessage, but onSystemMessageReceived is null");
 					}
 				}
 				else if (readIn instanceof ChatClientRequestMessage) {

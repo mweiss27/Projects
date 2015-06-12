@@ -99,11 +99,13 @@ public class ChatServer extends Thread {
 							while (!connectedClient.isClosed()) {
 								try {
 									byte[] buffer = new byte[1024];
-									int len;
+									int len = -1;
 									do {
-										len = clientInfo.readIn.read(buffer);
+										if (!connectedClient.isClosed() && !connectedClient.isInputShutdown()) {
+											len = clientInfo.readIn.read(buffer);
+											ChatServer.this.handleInput(buffer);
+										}
 
-										ChatServer.this.handleInput(buffer);
 									} while (len >= 0);
 								} catch (Exception any) {
 									Log.err("Exception on clientThread for " + clientName + ": " + any.getMessage());
@@ -155,6 +157,7 @@ public class ChatServer extends Thread {
 								}
 							}
 							if (toDrop != null) {
+								this.broadcast(new SystemMessage(this.clients.get(toDrop).name + " has disconnected."));
 								this.clients.remove(toDrop);
 							}
 							this.broadcast(new SystemMessage(REFRESH_USERS_MESSAGE));
@@ -198,7 +201,13 @@ public class ChatServer extends Thread {
 					final ObjectOutput objectOut = new ObjectOutputStream(out);
 					objectOut.writeObject(request);
 
-					clientInfo.writeOut.write(out.toByteArray());
+					if (!client.isClosed() && !client.isOutputShutdown()) {
+						clientInfo.writeOut.write(out.toByteArray());
+					}
+					else {
+						Log.err("[Server] socket is closed or output is shutdown for " + this.clients.get(client).name);
+					}
+
 					return;
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -218,7 +227,12 @@ public class ChatServer extends Thread {
 			for (final Socket client : this.clients.keySet()) {
 				if (!client.isInputShutdown() && !client.isOutputShutdown()) {
 					Log.info("[Server] Broadcasting " + message.getMessage() + " to client " + this.clients.get(client).name);
-					this.clients.get(client).writeOut.write(out.toByteArray());
+					if (!client.isClosed() && !client.isOutputShutdown()) {
+						this.clients.get(client).writeOut.write(out.toByteArray());
+					}
+					else {
+						Log.err("[Server] socket is closed or output is shutdown for " + this.clients.get(client).name);
+					}
 				}
 			}
 		} catch (IOException e) {
