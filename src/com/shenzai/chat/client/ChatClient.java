@@ -90,6 +90,9 @@ public class ChatClient {
 
 					} catch (final Exception any) {
 						Log.err("[Client] Exception on outputThread for " + ChatClient.this.getName() + ": " + any.getMessage());
+						if (ChatClient.this.socket.isClosed() || ChatClient.this.socket.isInputShutdown()) {
+							break;
+						}
 					}
 				}
 				Log.info("[Client] " + ChatClient.this.getName() + " no longer active. Ending outputThread.");
@@ -117,6 +120,9 @@ public class ChatClient {
 						} while (len >= 0);
 					} catch (final Exception any) {
 						Log.err("[Client] Exception on inputThread for " + ChatClient.this.getName() + ": " + any.getMessage());
+						if (ChatClient.this.socket.isClosed() || ChatClient.this.socket.isInputShutdown()) {
+							break;
+						}
 					}
 				}
 				Log.info("[Client] " + ChatClient.this.getName() + " no longer active. Ending inputThread.");
@@ -162,7 +168,11 @@ public class ChatClient {
 			public void run() {
 				Log.info("Client disconnecting. Removing ourself from the Server list.");
 				final ChatClientRequestMessage request = new ChatClientRequestMessage(ChatClient.this.getId(), Request.DISCONNECT);
-				ChatClient.this.send(request);
+				try {
+					ChatClient.this.send(request);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}));
 	}
@@ -246,71 +256,62 @@ public class ChatClient {
 		this.id = id;
 	}
 
-	public void send(final Message message) {
-		try {
-			final ByteArrayOutputStream out = new ByteArrayOutputStream();
+	public void send(final Message message) throws IOException {
+		final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
-			final ObjectOutput objectOut = new ObjectOutputStream(out);
-			objectOut.writeObject(message);
+		final ObjectOutput objectOut = new ObjectOutputStream(out);
+		objectOut.writeObject(message);
 
-			if (!this.socket.isClosed() && !this.socket.isOutputShutdown()) {
-				this.writeOut.write(out.toByteArray());
-			}
-			else {
-				Log.err("[Client] socket is closed or output is shutdown for " + this.getName());
-			}
-			
-		} catch (IOException e) {
-			e.printStackTrace();
+		if (!this.socket.isClosed() && !this.socket.isOutputShutdown()) {
+			this.writeOut.write(out.toByteArray());
+		}
+		else {
+			Log.err("[Client] socket is closed or output is shutdown for " + this.getName());
 		}
 	}
 
-	private void receive(final byte[] messageBytes) {
+	private void receive(final byte[] messageBytes) throws IOException, ClassNotFoundException {
 		Log.info("[Client] Receiving " + messageBytes.length + " bytes");
-		try {
-			final ByteArrayInputStream in = new ByteArrayInputStream(messageBytes);
-			final ObjectInputStream objectIn = new ObjectInputStream(in);
+		final ByteArrayInputStream in = new ByteArrayInputStream(messageBytes);
+		final ObjectInputStream objectIn = new ObjectInputStream(in);
 
-			final Object readIn = objectIn.readObject();
-			Log.info("[Client] received object: " + readIn);
-			if (readIn != null) {
-				if (readIn instanceof ChatMessage) {
-					final ChatMessage message = (ChatMessage) readIn;
-					if (this.onChatMessageReceived != null) {
-						this.onChatMessageReceived.messageReceived(message);
-					}
-					else {
-						Log.err("[Client] Received a ChatMessage, but onChatMessageReceived is null");
-					}
-				}
-				else if (readIn instanceof SystemMessage) {
-					final SystemMessage message = (SystemMessage) readIn;
-					if (this.onSystemMessageReceived != null) {
-						this.onSystemMessageReceived.messageReceived(message);
-					}
-					else {
-						Log.err("[Client] Received a SystemMessage, but onSystemMessageReceived is null");
-					}
-				}
-				else if (readIn instanceof ChatClientRequestMessage) {
-					final ChatClientRequestMessage answer = (ChatClientRequestMessage) readIn;
-					Log.info("[Client] " + this.getName() + " received an answer (" + Arrays.asList((String[]) answer.getAnswer()) + ") . Notifying its wait");
-					synchronized(this.messagesWaitingOnAnswer.get(answer.requestId)) {
-						this.messagesWaitingOnAnswer.get(answer.requestId).notifyAll();
-						this.messagesWaitingOnAnswer.set(answer.requestId, answer);
-					}
+		final Object readIn = objectIn.readObject();
+		Log.info("[Client] received object: " + readIn);
+		if (readIn != null) {
+			if (readIn instanceof ChatMessage) {
+				final ChatMessage message = (ChatMessage) readIn;
+				if (this.onChatMessageReceived != null) {
+					this.onChatMessageReceived.messageReceived(message);
 				}
 				else {
-					Log.err("[Client] We don't recognize this type of message: " + readIn.getClass());
+					Log.err("[Client] Received a ChatMessage, but onChatMessageReceived is null");
+				}
+			}
+			else if (readIn instanceof SystemMessage) {
+				final SystemMessage message = (SystemMessage) readIn;
+				if (this.onSystemMessageReceived != null) {
+					this.onSystemMessageReceived.messageReceived(message);
+				}
+				else {
+					Log.err("[Client] Received a SystemMessage, but onSystemMessageReceived is null");
+				}
+			}
+			else if (readIn instanceof ChatClientRequestMessage) {
+				final ChatClientRequestMessage answer = (ChatClientRequestMessage) readIn;
+				Log.info("[Client] " + this.getName() + " received an answer (" + Arrays.asList((String[]) answer.getAnswer()) + ") . Notifying its wait");
+				synchronized(this.messagesWaitingOnAnswer.get(answer.requestId)) {
+					this.messagesWaitingOnAnswer.get(answer.requestId).notifyAll();
+					this.messagesWaitingOnAnswer.set(answer.requestId, answer);
 				}
 			}
 			else {
-				Log.err("[Client] readIn is null");
+				Log.err("[Client] We don't recognize this type of message: " + readIn.getClass());
 			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+		else {
+			Log.err("[Client] readIn is null");
+		}
+
 	}
 
 	private void waitForAnswer(final ChatClientRequestMessage request) {
@@ -356,8 +357,12 @@ public class ChatClient {
 						final ChatMessage chatMessage = new ChatMessage(ChatClient.this.getId(), 
 								ChatClient.this.getName(), chatWindow.chatbox.getText());
 
-						ChatClient.this.send(chatMessage);
-						chatWindow.chatbox.setText("");
+						try {
+							ChatClient.this.send(chatMessage);
+							chatWindow.chatbox.setText("");
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
 					}
 				}
 			}
