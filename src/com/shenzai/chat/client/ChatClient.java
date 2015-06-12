@@ -14,6 +14,7 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -62,7 +63,7 @@ public class ChatClient {
 	private Lock userListPollLock = new ReentrantLock();
 
 	public ChatClient(final int port, final String name) throws IOException {
-		this.socket = new Socket(InetAddress.getLocalHost(), port);
+		this.socket = new Socket(InetAddress.getByName("192.168.0.4"), port);
 		this.name = name;
 		Log.info("[Client] Connected to server. Requesting a Client Id...");
 		this.writeOut = new DataOutputStream(this.socket.getOutputStream());
