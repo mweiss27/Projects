@@ -13,6 +13,7 @@ import javax.swing.SwingUtilities;
 import com.shenzai.chat.client.ChatClient;
 import com.shenzai.chat.server.ChatServer;
 import com.shenzai.chat.util.ChatClientConfig;
+import com.shenzai.chat.util.SwingUtil;
 import com.shenzai.chat.util.Time;
 import com.shenzai.chat.util.Worker;
 
@@ -95,6 +96,9 @@ public class ChatClientController {
 								final ChatClient chatClient = new ChatClient(ChatClientConfig.PORT, username);
 								chatClient.start();
 								view.loginScreen.usernameField.setText("");
+								view.chatWindow.build(chatClient);
+								chatClient.bindChatWindow(view.chatWindow);
+								SwingUtil.getCardLayout(view.container).show(view.container, ChatClientUI.CHAT_ROOM_CARD);
 							}
 							view.loginScreen.loadingPanel.setVisible(false);
 						} catch (final IOException e) {
@@ -116,7 +120,6 @@ public class ChatClientController {
 				});
 			}
 		});
-		
 		view.loginScreen.usernameButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {

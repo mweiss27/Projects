@@ -25,6 +25,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 
+import com.shenzai.chat.client.ChatClient;
 import com.shenzai.chat.ui.ChatClientUI;
 import com.shenzai.chat.util.ChatClientConfig;
 

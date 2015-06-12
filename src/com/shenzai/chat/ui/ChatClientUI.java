@@ -8,16 +8,18 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
+import com.shenzai.chat.ui.cards.ChatWindow;
 import com.shenzai.chat.ui.cards.LoginScreen;
 import com.shenzai.chat.util.SwingUtil;
 
 public class ChatClientUI extends JFrame {
 
-	private JPanel container;
+	public final JPanel container;
 	public final LoginScreen loginScreen;
+	public final ChatWindow chatWindow;
 	
 	public static final String LOGIN_CARD = "login";
-	public static final String CHAT_ROOM = "chat";
+	public static final String CHAT_ROOM_CARD = "chat";
 	
 	public ChatClientUI() {
 		super("Shenzai's Chat Client");
@@ -30,8 +32,10 @@ public class ChatClientUI extends JFrame {
 		this.container = new JPanel(new CardLayout());
 		
 		this.loginScreen = new LoginScreen();
+		this.chatWindow = new ChatWindow();
 		
 		this.container.add(this.loginScreen, LOGIN_CARD);
+		this.container.add(this.chatWindow, CHAT_ROOM_CARD);
 
 		SwingUtil.getCardLayout(this.container).show(this.container, LOGIN_CARD);
 		

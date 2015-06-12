@@ -8,13 +8,9 @@ import java.io.DataOutputStream;
  */
 public class ClientInfo {
 
-	private final int id;
+	public int id;
 	public String name;
 	public DataInputStream readIn;
 	public DataOutputStream writeOut;
-	
-	public ClientInfo(final int id) {
-		this.id = id;
-	}
 	
 }
