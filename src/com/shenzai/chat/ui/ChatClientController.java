@@ -7,6 +7,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
+import java.net.InetAddress;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
@@ -26,7 +27,7 @@ public class ChatClientController {
 
 	private boolean back;
 	
-	private static final Pattern IP_PATTERN = Pattern.compile("(?:[0-9]{1,3}\\.){3}[0-9]{1,3}");
+	private static final Pattern IP_PATTERN = Pattern.compile("([0-9]{1,3}\\.){3}[0-9]{1,3}");
 
 	public ChatClientController(final ChatClientUI view) {
 		this.view = view;
@@ -104,7 +105,7 @@ public class ChatClientController {
 							final String username = view.loginScreen.usernameField.getText().trim();
 							if (username.length() > 0) {
 								ChatClientConfig.set("user", username);
-								final ChatClient chatClient = new ChatClient(ChatClientConfig.PORT, username);
+								final ChatClient chatClient = new ChatClient(InetAddress.getByName(view.loginScreen.ipField.getText().trim()), ChatClientConfig.PORT, username);
 								chatClient.start();
 								view.loginScreen.usernameField.setText("");
 								view.chatWindow.build(chatClient);
@@ -114,6 +115,7 @@ public class ChatClientController {
 							}
 							view.loginScreen.loadingPanel.setVisible(false);
 						} catch (final IOException e) {
+							e.printStackTrace();
 							view.loginScreen.loadingPanel.setVisible(false);
 							if (!back) {
 								view.loginScreen.clientConnectFailedLabel.setText(view.loginScreen.clientConnectFailedLabel.

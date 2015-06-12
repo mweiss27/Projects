@@ -61,8 +61,8 @@ public class ChatClient {
 	private ScheduledExecutorService userListPoll;
 	private Lock userListPollLock = new ReentrantLock();
 
-	public ChatClient(final int port, final String name) throws IOException {
-		this.socket = new Socket(InetAddress.getByName("192.168.0.4"), port);
+	public ChatClient(final InetAddress address, final int port, final String name) throws IOException {
+		this.socket = new Socket(address, port);
 		this.name = name;
 		Log.info("[Client] Connected to server. Requesting a Client Id...");
 		this.writeOut = new DataOutputStream(this.socket.getOutputStream());
