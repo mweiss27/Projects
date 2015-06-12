@@ -14,7 +14,6 @@ import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
 import java.net.Socket;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -101,12 +100,17 @@ public class ChatClient {
 				while (ChatClient.this.active) {
 					try {
 						byte[] buffer = new byte[1024];
-						int len;
+						int len = -1;
 						do {
 							Log.info("[Client] " + ChatClient.this.getName() + " waiting for an input command");
-							len = ChatClient.this.readIn.read(buffer);
-							Log.info("[Client] " + ChatClient.this.getName() + " input command received. Handling");
-							ChatClient.this.receive(buffer);
+							if (!ChatClient.this.socket.isInputShutdown()) {
+								len = ChatClient.this.readIn.read(buffer);
+								Log.info("[Client] " + ChatClient.this.getName() + " input command received. Handling");
+								ChatClient.this.receive(buffer);
+							}
+							else {
+								break;
+							}
 						} while (len >= 0);
 					} catch (final Exception any) {
 						Log.err("[Client] Exception on inputThread for " + ChatClient.this.getName() + ": " + any.getMessage());
@@ -172,7 +176,7 @@ public class ChatClient {
 			public void run() {
 				ChatClient.this.updateUserList();
 			}
-		}, 0, 10, TimeUnit.SECONDS);
+		}, 0, 45, TimeUnit.SECONDS);
 	}
 
 	public void updateUserList() {
@@ -334,8 +338,7 @@ public class ChatClient {
 					if (chatWindow.chatbox.getText().trim().length() > 0) {
 						final ChatMessage chatMessage = new ChatMessage(ChatClient.this.getId(), 
 								ChatClient.this.getName(), chatWindow.chatbox.getText());
-
-						ChatClient.this.send(chatMessage);
+						ChatClient.this.messagesToSend.offer(chatMessage);
 						chatWindow.chatbox.setText("");
 					}
 				}

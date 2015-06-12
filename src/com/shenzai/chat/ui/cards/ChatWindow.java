@@ -13,12 +13,13 @@ import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
 import com.shenzai.chat.client.ChatClient;
+import com.shenzai.chat.util.ChatClientConfig;
 import com.shenzai.io.Log;
 
 public class ChatWindow extends JPanel {
@@ -27,7 +28,7 @@ public class ChatWindow extends JPanel {
 	public JList<String> connectedUsers;
 	public JTextField chatbox;
 	private JScrollPane chatWindowScroll;
-	public JTextArea chatWindow;
+	public JTextPane chatWindow;
 	public JLabel sendButton;
 
 	public ChatWindow() {
@@ -39,16 +40,25 @@ public class ChatWindow extends JPanel {
 		this.setPreferredSize(new Dimension(500, 400));
 		
 		this.chattingAs = new JLabel("Chatting as: null", SwingConstants.CENTER);
+		this.chattingAs.setFont(ChatClientConfig.getFont());
+		
 		this.connectedUsers = new JList<>();
+		this.connectedUsers.setFont(ChatClientConfig.getFont());
 		this.connectedUsers.setPreferredSize(new Dimension(100, 1));
 		this.connectedUsers.setFocusable(false);
 		
+		
 		this.chatbox = new JTextField(30);
-		this.chatWindow = new JTextArea(20, 30);
+		this.chatbox.setFont(ChatClientConfig.getFont());
+		
+		this.chatWindow = new JTextPane();
 		this.chatWindow.setEditable(false);
+		this.chatWindow.setFont(ChatClientConfig.getFont());
+		
 		
 		this.chatWindowScroll = new JScrollPane(this.chatWindow);
 		this.chatWindowScroll.setVerticalScrollBarPolicy(ScrollPaneConstants.VERTICAL_SCROLLBAR_AS_NEEDED);
+		this.chatWindowScroll.setHorizontalScrollBarPolicy(ScrollPaneConstants.HORIZONTAL_SCROLLBAR_NEVER);
 		
 		try {
 			this.sendButton = new JLabel(
