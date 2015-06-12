@@ -1,6 +1,7 @@
 package com.shenzai.chat.ui.cards;
 
 import java.awt.BorderLayout;
+import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Image;
@@ -57,6 +58,9 @@ public class ChatWindow extends JPanel {
 			Log.err("Error reading send_button.png");
 			this.sendButton = new JLabel(">");
 		}
+		
+		this.sendButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		this.sendButton.setToolTipText("Send");
 		
 		this.add(this.chattingAs, BorderLayout.NORTH);
 		this.add(this.connectedUsers, BorderLayout.WEST);

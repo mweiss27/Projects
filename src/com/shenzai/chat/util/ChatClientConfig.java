@@ -2,12 +2,17 @@ package com.shenzai.chat.util;
 
 import java.awt.Font;
 import java.net.InetAddress;
+import java.util.prefs.Preferences;
+
+import com.shenzai.chat.client.ChatClient;
 
 public class ChatClientConfig {
 
 	public static final InetAddress HOST_ADDRESS;
 	public static final int PORT = 50500;
 	private static final Font baseFont = new Font("Arial Unicode", Font.PLAIN, 12);
+	
+	private static Preferences prefs = Preferences.userNodeForPackage(ChatClient.class);
 	
 	static {
 		InetAddress toUse = null;
@@ -22,6 +27,18 @@ public class ChatClientConfig {
 			}
 		}
 		HOST_ADDRESS = toUse;
+	}
+	
+	public static void set(final String key, final String value) {
+		prefs.put(key, value);
+	}
+	
+	public static String get(final String key) {
+		return get(key, "");
+	}
+	
+	public static String get(final String key, final String def) {
+		return prefs.get(key, def);
 	}
 	
 	public static final Font getFont() {

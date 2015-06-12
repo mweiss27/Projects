@@ -1,18 +1,21 @@
 package com.shenzai.chat.ui.cards;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Cursor;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Font;
+import java.awt.Graphics;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -24,10 +27,12 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 
-import com.shenzai.chat.client.ChatClient;
 import com.shenzai.chat.ui.ChatClientUI;
 import com.shenzai.chat.util.ChatClientConfig;
+import com.shenzai.wrappers.swing.FlowPanel;
+import com.shenzai.wrappers.swing.VerticalFlowPanel;
 
 public class LoginScreen extends JPanel {
 
@@ -40,19 +45,26 @@ public class LoginScreen extends JPanel {
 	public JPanel serverAlreadyStartedPanel;
 	public JPanel serverStartedSuccessfullyPanel;
 	public JPanel clientConnectFailedPanel;
-	public JPanel enterUsernamePanel;
+	public JPanel invalidIpPanel;
+	public JLabel clientConnectFailedLabel;
+
+	public JTextField ipField;
+
+	public JPanel enterClientInfoPanel;
 	public JTextField usernameField;
-	public JLabel usernameButton;
+
+	public JLabel backButton;
+	public JLabel loginButton;
 
 	public JLabel connectingToServer;
 	public JLabel loadingGif;
 	private Image[] loadingSprites;
-	
+
 	public LoginScreen() {
 		super(new GridBagLayout());
 		this.init();
 	}
-	
+
 	public void initGlassPane() {
 		final int centerX = this.getPreferredSize().width / 2;
 		final Rectangle glassPaneBounds = new Rectangle();
@@ -77,17 +89,30 @@ public class LoginScreen extends JPanel {
 		glassPaneBounds.setSize(this.clientConnectFailedPanel.getPreferredSize());
 		this.clientConnectFailedPanel.setBounds(glassPaneBounds);
 
-		glassPaneBounds.setLocation(centerX - (this.enterUsernamePanel.getPreferredSize().width / 2), 
+		glassPaneBounds.setLocation(centerX - (this.enterClientInfoPanel.getPreferredSize().width / 2), 
 				this.startServer.getY() + this.startServer.getPreferredSize().height + 5);
-		glassPaneBounds.setSize(this.enterUsernamePanel.getPreferredSize());
-		this.enterUsernamePanel.setBounds(glassPaneBounds);
+		glassPaneBounds.setSize(this.enterClientInfoPanel.getPreferredSize());
+		this.enterClientInfoPanel.setBounds(glassPaneBounds);
+
 	}
-	
-	
+
+
 	private void init() {
 		this.setPreferredSize(new Dimension(500, 400));
 
-		this.glassPane = new JPanel();
+		this.glassPane = new JPanel() {
+			@Override
+			protected void paintComponent(Graphics g) {
+				super.paintComponent(g);
+
+				g.setColor(Color.LIGHT_GRAY);
+				try {
+					g.drawString("IP Address: " + InetAddress.getLocalHost().getHostAddress(), 10, 20);
+				} catch (UnknownHostException ignored) {
+				}
+
+			}
+		};
 		this.glassPane.setLayout(null);
 		this.glassPane.setOpaque(false);
 
@@ -180,13 +205,19 @@ public class LoginScreen extends JPanel {
 		this.serverAlreadyStartedPanel.setOpaque(false);
 		this.serverAlreadyStartedPanel.add(serverAlreadyStartedLabel);
 
-		final JLabel serverStartedSuccessfullyLabel = new JLabel("Server bound to port " + ChatClientConfig.PORT);
+		final JLabel serverStartedSuccessfullyLabel = new JLabel("<html><center>Server bound to<br />%IP%:" + ChatClientConfig.PORT + "</center></html>");
 		serverStartedSuccessfullyLabel.setFont(ChatClientConfig.getFont(Font.BOLD, 18f));
 		serverStartedSuccessfullyLabel.setForeground(Color.green.darker());
 
-		final JLabel clientConnectFailedLabel = new JLabel("Failed to connect to server on port " + ChatClientConfig.PORT);
-		clientConnectFailedLabel.setFont(ChatClientConfig.getFont(Font.BOLD, 18f));
-		clientConnectFailedLabel.setForeground(Color.red);
+		try {
+			serverStartedSuccessfullyLabel.setText(serverStartedSuccessfullyLabel.getText().replace("%IP%", InetAddress.getLocalHost().getHostAddress()));
+		} catch (Exception e) {
+			serverStartedSuccessfullyLabel.setText(serverStartedSuccessfullyLabel.getText().replace("%IP%", ""));
+		}
+
+		this.clientConnectFailedLabel = new JLabel("<html>Failed to connect to server at %IP%:" + ChatClientConfig.PORT + "</html>");
+		this.clientConnectFailedLabel.setFont(ChatClientConfig.getFont(Font.BOLD, 18f));
+		this.clientConnectFailedLabel.setForeground(Color.red);
 
 		this.serverStartedSuccessfullyPanel = new JPanel(new GridBagLayout());
 		this.serverStartedSuccessfullyPanel.setOpaque(false);
@@ -194,17 +225,37 @@ public class LoginScreen extends JPanel {
 
 		this.clientConnectFailedPanel = new JPanel(new GridBagLayout());
 		this.clientConnectFailedPanel.setOpaque(false);
-		this.clientConnectFailedPanel.add(clientConnectFailedLabel);
+		this.clientConnectFailedPanel.add(this.clientConnectFailedLabel);
 
-		this.enterUsernamePanel = new JPanel(new BorderLayout(0, 0));
-		this.usernameField = new JTextField(15);
-		
-		this.enterUsernamePanel.setOpaque(false);
-		this.enterUsernamePanel.add(new JLabel("  Enter a Username"), BorderLayout.NORTH); //intentional spaces
-		final JPanel usernameCenter = new JPanel(new FlowLayout(FlowLayout.LEFT)); //flowlayout
-		
+		this.enterClientInfoPanel = new VerticalFlowPanel(FlowLayout.LEFT, 0) {
+			@Override
+			public void setVisible(boolean aFlag) {
+				Point ipFieldLoc = ipField.getLocation();
+				ipFieldLoc = SwingUtilities.convertPoint(enterClientInfoPanel, ipFieldLoc, glassPane);
+				ipFieldLoc.translate(ipField.getWidth() + 5, ipField.getHeight()/4);
+				
+				System.out.println("ipFieldLoc: " + ipFieldLoc);
+				invalidIpPanel.setLocation(ipFieldLoc);
+				invalidIpPanel.setSize(invalidIpPanel.getPreferredSize());
+				super.setVisible(aFlag);
+			}
+		};
+
+		this.usernameField = new JTextField(ChatClientConfig.get("user"), 15);
+		this.ipField = new JTextField(15);
 		try {
-			this.usernameButton = new JLabel(
+			this.ipField.setText(ChatClientConfig.get("server_ip", InetAddress.getLocalHost().getHostAddress()));
+		} catch (Exception ignored){}
+
+		this.enterClientInfoPanel.setOpaque(false);
+
+		this.enterClientInfoPanel.add(new JLabel("Enter Server Address"));
+		this.enterClientInfoPanel.add(this.ipField);
+
+		this.enterClientInfoPanel.add(new JLabel("Enter a Username")); //intentional spaces
+
+		try {
+			this.loginButton = new JLabel(
 					new ImageIcon(
 							ImageIO.read(
 									this.getClass().getResourceAsStream("/com/shenzai/chat/resources/login_button.png")
@@ -213,30 +264,51 @@ public class LoginScreen extends JPanel {
 					);
 		} catch (IOException e) {
 			e.printStackTrace();
-			this.usernameButton = new JLabel(">");
+			this.loginButton = new JLabel("Login");
 		}
-		
-		this.usernameButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
-		this.usernameButton.setToolTipText("Login");
-		
-		usernameCenter.add(this.usernameField);
-		usernameCenter.add(this.usernameButton);
-		this.enterUsernamePanel.add(usernameCenter, BorderLayout.CENTER);
+
+		try {
+			this.backButton = new JLabel(
+					new ImageIcon(
+							ImageIO.read(
+									this.getClass().getResourceAsStream("/com/shenzai/chat/resources/login_back.png")
+									).getScaledInstance(20, 20, Image.SCALE_SMOOTH)
+							)
+					);
+		} catch (IOException e) {
+			e.printStackTrace();
+			this.backButton = new JLabel("Cancel");
+		}
+
+		this.loginButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		this.loginButton.setToolTipText("Login");
+
+		this.backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+		this.backButton.setToolTipText("Cancel");
+
+		this.enterClientInfoPanel.add(this.usernameField);
+		this.enterClientInfoPanel.add(new FlowPanel(FlowLayout.CENTER, 3, this.backButton, this.loginButton), FlowLayout.CENTER);
+
+		this.invalidIpPanel = new JPanel(new GridBagLayout());
+		this.invalidIpPanel.add(new JLabel("Invalid IP Address")
+		{{ setForeground(Color.red); }});
 
 		this.glassPane.add(this.loadingPanel);
 		this.glassPane.add(this.serverAlreadyStartedPanel);
 		this.glassPane.add(this.serverStartedSuccessfullyPanel);
 		this.glassPane.add(this.clientConnectFailedPanel);
-		this.glassPane.add(this.enterUsernamePanel);
+		this.glassPane.add(this.enterClientInfoPanel);
+		this.glassPane.add(this.invalidIpPanel);
 
 		this.loadingPanel.setVisible(false);
 		this.serverAlreadyStartedPanel.setVisible(false);
 		this.serverStartedSuccessfullyPanel.setVisible(false);
 		this.clientConnectFailedPanel.setVisible(false);
-		this.enterUsernamePanel.setVisible(false);
+		this.enterClientInfoPanel.setVisible(false);
+		this.invalidIpPanel.setVisible(false);
 
 	}
-	
+
 	private Image[] loadLoadingSprites() {
 		try {
 			final BufferedImage sprite = ImageIO.read(ChatClientUI.class.getResourceAsStream("/com/shenzai/chat/resources/loadingSprites.png"));
@@ -258,5 +330,5 @@ public class LoginScreen extends JPanel {
 		}
 		return new BufferedImage[] { };
 	}
-	
+
 }
