@@ -212,10 +212,11 @@ public class LoginScreen extends JPanel {
 		try {
 			serverStartedSuccessfullyLabel.setText(serverStartedSuccessfullyLabel.getText().replace("%IP%", InetAddress.getLocalHost().getHostAddress()));
 		} catch (Exception e) {
+			e.printStackTrace();
 			serverStartedSuccessfullyLabel.setText(serverStartedSuccessfullyLabel.getText().replace("%IP%", ""));
 		}
 
-		this.clientConnectFailedLabel = new JLabel("<html>Failed to connect to server at %IP%:" + ChatClientConfig.PORT + "</html>");
+		this.clientConnectFailedLabel = new JLabel("<html><center>Failed to connect to server at<br />%IP%:" + ChatClientConfig.PORT + "</center></html>");
 		this.clientConnectFailedLabel.setFont(ChatClientConfig.getFont(Font.BOLD, 18f));
 		this.clientConnectFailedLabel.setForeground(Color.red);
 
@@ -234,7 +235,6 @@ public class LoginScreen extends JPanel {
 				ipFieldLoc = SwingUtilities.convertPoint(enterClientInfoPanel, ipFieldLoc, glassPane);
 				ipFieldLoc.translate(ipField.getWidth() + 5, ipField.getHeight()/4);
 				
-				System.out.println("ipFieldLoc: " + ipFieldLoc);
 				invalidIpPanel.setLocation(ipFieldLoc);
 				invalidIpPanel.setSize(invalidIpPanel.getPreferredSize());
 				super.setVisible(aFlag);
@@ -245,7 +245,9 @@ public class LoginScreen extends JPanel {
 		this.ipField = new JTextField(15);
 		try {
 			this.ipField.setText(ChatClientConfig.get("server_ip", InetAddress.getLocalHost().getHostAddress()));
-		} catch (Exception ignored){}
+		} catch (Exception ignored){
+			ignored.printStackTrace();
+		}
 
 		this.enterClientInfoPanel.setOpaque(false);
 

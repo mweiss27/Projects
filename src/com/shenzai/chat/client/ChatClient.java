@@ -13,6 +13,7 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -62,7 +63,9 @@ public class ChatClient {
 	private Lock userListPollLock = new ReentrantLock();
 
 	public ChatClient(final InetAddress address, final int port, final String name) throws IOException {
-		this.socket = new Socket(address, port);
+		Log.info("[Client] Attempting to connect to " + address.getHostAddress() + ":" + port);
+		this.socket = new Socket();
+		this.socket.connect(new InetSocketAddress(address, port), 2000);
 		this.name = name;
 		Log.info("[Client] Connected to server. Requesting a Client Id...");
 		this.writeOut = new DataOutputStream(this.socket.getOutputStream());
@@ -256,7 +259,7 @@ public class ChatClient {
 			else {
 				Log.err("[Client] socket is closed or output is shutdown for " + this.getName());
 			}
-
+			
 		} catch (IOException e) {
 			e.printStackTrace();
 		}

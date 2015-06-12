@@ -8,6 +8,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.net.InetAddress;
+import java.util.concurrent.Future;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
@@ -60,6 +61,7 @@ public class ChatClientController {
 								}
 							});
 						} catch (final IOException e) {
+							e.printStackTrace();
 							view.loginScreen.loadingPanel.setVisible(false);
 							view.loginScreen.serverAlreadyStartedPanel.setVisible(true);
 							Worker.execute(new Runnable() {
@@ -87,57 +89,6 @@ public class ChatClientController {
 				view.loginScreen.serverAlreadyStartedPanel.setVisible(false);
 				view.loginScreen.serverStartedSuccessfullyPanel.setVisible(false);
 				view.loginScreen.enterClientInfoPanel.setVisible(true);
-				Worker.execute(new Runnable() {
-					@Override
-					public void run() {
-						try {
-
-							synchronized(view.loginScreen.loginButton) {
-								try {
-									view.loginScreen.loginButton.wait();
-								} catch (InterruptedException e) {
-								}
-							}
-							view.loginScreen.invalidIpPanel.setVisible(false);
-							if (back) {
-								throw new IOException();
-							}
-							final String username = view.loginScreen.usernameField.getText().trim();
-							if (username.length() > 0) {
-								ChatClientConfig.set("user", username);
-								final ChatClient chatClient = new ChatClient(InetAddress.getByName(view.loginScreen.ipField.getText().trim()), ChatClientConfig.PORT, username);
-								chatClient.start();
-								view.loginScreen.usernameField.setText("");
-								view.chatWindow.build(chatClient);
-								view.loginScreen.glassPane.setVisible(false);
-								chatClient.bindChatWindow(view.chatWindow);
-								SwingUtil.getCardLayout(view.container).show(view.container, ChatClientUI.CHAT_ROOM_CARD);
-							}
-							view.loginScreen.loadingPanel.setVisible(false);
-						} catch (final IOException e) {
-							e.printStackTrace();
-							view.loginScreen.loadingPanel.setVisible(false);
-							if (!back) {
-								view.loginScreen.clientConnectFailedLabel.setText(view.loginScreen.clientConnectFailedLabel.
-										getText().replace("%IP%", view.loginScreen.ipField.getText().trim()));
-								view.loginScreen.clientConnectFailedPanel.setSize(view.loginScreen.clientConnectFailedPanel.getPreferredSize());
-								view.loginScreen.clientConnectFailedPanel.setVisible(true);
-								Worker.execute(new Runnable() {
-									@Override
-									public void run() {
-										Time.sleep(2000);
-										view.loginScreen.clientConnectFailedPanel.setVisible(false);
-									}
-								});
-							}
-							back = false;
-						} finally {
-							view.loginScreen.startClient.setEnabled(true);
-							view.loginScreen.startServer.setEnabled(true);
-							view.loginScreen.enterClientInfoPanel.setVisible(false);
-						}
-					}
-				});
 			}
 		});
 		view.loginScreen.loginButton.addMouseListener(new MouseAdapter() {
@@ -152,9 +103,7 @@ public class ChatClientController {
 						return;
 					}
 					
-					synchronized(view.loginScreen.loginButton) {
-						view.loginScreen.loginButton.notifyAll();
-					}
+					ChatClientController.this.loginAction();
 				}
 			}
 		});
@@ -164,9 +113,8 @@ public class ChatClientController {
 			public void mouseClicked(MouseEvent e) {
 				if (view.loginScreen.backButton.isEnabled() && SwingUtilities.isLeftMouseButton(e)) {
 					ChatClientController.this.back = true;
-					synchronized(view.loginScreen.loginButton) {
-						view.loginScreen.loginButton.notifyAll();
-					}
+
+					ChatClientController.this.loginAction();
 				}
 			}
 		});
@@ -175,7 +123,6 @@ public class ChatClientController {
 			@Override
 			public void keyReleased(KeyEvent e) {
 				if (e.getKeyChar() == '\n') {
-					
 					final String ip = view.loginScreen.ipField.getText();
 					if (!IP_PATTERN.matcher(ip).matches()) {
 						Log.err("[Login] IP does not match pattern: " + ip);
@@ -183,14 +130,65 @@ public class ChatClientController {
 						return;
 					}
 					
-					synchronized(view.loginScreen.loginButton) {
-						view.loginScreen.loginButton.notifyAll();
-					}
+					ChatClientController.this.loginAction();
 				}
 			}
 		};
 		view.loginScreen.usernameField.addKeyListener(ka);
 		view.loginScreen.ipField.addKeyListener(ka);
+	}
+	
+	private void loginAction() {
+		Worker.execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					view.loginScreen.invalidIpPanel.setVisible(false);
+					if (back) {
+						throw new IOException();
+					}
+					final String username = view.loginScreen.usernameField.getText().trim();
+					if (username.length() > 0) {
+
+								view.loginScreen.enterClientInfoPanel.setVisible(false);
+								view.loginScreen.loadingPanel.setVisible(true);
+						
+						ChatClientConfig.set("user", username);
+						ChatClientConfig.set("server_ip", view.loginScreen.ipField.getText().trim());
+						final ChatClient chatClient = new ChatClient(InetAddress.getByName(view.loginScreen.ipField.getText().trim()), ChatClientConfig.PORT, username);
+						chatClient.start();
+						view.loginScreen.usernameField.setText("");
+						view.chatWindow.build(chatClient);
+						view.loginScreen.glassPane.setVisible(false);
+						chatClient.bindChatWindow(view.chatWindow);
+						SwingUtil.getCardLayout(view.container).show(view.container, ChatClientUI.CHAT_ROOM_CARD);
+					}
+					view.loginScreen.loadingPanel.setVisible(false);
+				} catch (final IOException e) {
+					view.loginScreen.enterClientInfoPanel.setVisible(false);
+					e.printStackTrace();
+					view.loginScreen.loadingPanel.setVisible(false);
+					if (!back) {
+						view.loginScreen.clientConnectFailedLabel.setText(view.loginScreen.clientConnectFailedLabel.
+								getText().replace("%IP%", view.loginScreen.ipField.getText().trim()));
+						view.loginScreen.clientConnectFailedPanel.setSize(view.loginScreen.clientConnectFailedPanel.getPreferredSize());
+						view.loginScreen.clientConnectFailedPanel.setVisible(true);
+						Worker.execute(new Runnable() {
+							@Override
+							public void run() {
+								Time.sleep(2000);
+								view.loginScreen.clientConnectFailedPanel.setVisible(false);
+							}
+						});
+					}
+					back = false;
+				} finally {
+					view.loginScreen.startClient.setEnabled(true);
+					view.loginScreen.startServer.setEnabled(true);
+					view.loginScreen.enterClientInfoPanel.setVisible(false);
+				}
+			}
+		});
 	}
 
 }
