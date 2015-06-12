@@ -20,6 +20,8 @@ import java.util.concurrent.Executors;
 import org.apache.commons.io.IOUtils;
 
 import com.shenzai.chat.message.ChatClientRequestMessage;
+import com.shenzai.chat.message.ChatMessage;
+import com.shenzai.chat.message.Message;
 import com.shenzai.chat.message.Request;
 import com.shenzai.chat.message.SystemMessage;
 import com.shenzai.io.Log;
@@ -27,6 +29,7 @@ import com.shenzai.io.Log;
 public class ChatServer extends Thread {
 
 	public static final String SHUTDOWN_MESSAGE = ".shutdown";
+	public static final String REFRESH_USERS_MESSAGE = ".refresh_users";
 
 	private Map<Socket, ClientInfo> clients = new HashMap<>();
 	private ExecutorService clientThreads = Executors.newFixedThreadPool(10);
@@ -78,8 +81,8 @@ public class ChatServer extends Thread {
 					Log.info("[Server] " + clientName + " connected. Assigning id " + id);
 					writeOut.writeInt(id);
 
-					final SystemMessage newConnection = new SystemMessage(clientName + " has connected.");
-					this.broadcast(newConnection);
+					this.broadcast(new SystemMessage(clientName + " has connected."));
+					this.broadcast(new SystemMessage(REFRESH_USERS_MESSAGE));
 
 					final ClientInfo clientInfo = new ClientInfo();
 					clientInfo.id = id;
@@ -93,18 +96,17 @@ public class ChatServer extends Thread {
 					ChatServer.this.clientThreads.execute(new Runnable() {
 						@Override
 						public void run() {
-							while (true) {
+							while (!connectedClient.isClosed()) {
 								try {
 									byte[] buffer = new byte[1024];
 									int len;
 									do {
 										len = clientInfo.readIn.read(buffer);
 
-										ChatServer.this.handleRequest(buffer);
-
+										ChatServer.this.handleInput(buffer);
 									} while (len >= 0);
 								} catch (Exception any) {
-									//any.printStackTrace();
+									Log.err("Exception on clientThread for " + clientName + ": " + any.getMessage());
 								}
 							}
 						}
@@ -116,7 +118,7 @@ public class ChatServer extends Thread {
 			}
 	}
 
-	private void handleRequest(final byte[] requestBytes) {
+	private void handleInput(final byte[] requestBytes) {
 		try {
 			final ByteArrayInputStream in = new ByteArrayInputStream(requestBytes);
 			final ObjectInputStream objectIn = new ObjectInputStream(in);
@@ -141,18 +143,46 @@ public class ChatServer extends Thread {
 							request.setAnswer(users.toArray(new String[users.size()]));
 							this.sendAnswer(request);
 							break;
+						case Request.DISCONNECT:
+							final int clientId = request.getClientId();
+							Socket toDrop = null;
+							for (final Socket client : this.clients.keySet()) {
+								clientInfo = this.clients.get(client);
+								if (clientInfo.id == clientId) {
+									this.dropClient(client);
+									toDrop = client;
+									break;
+								}
+							}
+							if (toDrop != null) {
+								this.clients.remove(toDrop);
+							}
+							this.broadcast(new SystemMessage(REFRESH_USERS_MESSAGE));
+							break;
 						default:
 							Log.err("[Server] We don't recognize this request value: " + requestInteger);
 					}
 				}
+			}
+			else if (readIn instanceof ChatMessage) {
+				final ChatMessage chatMessage = (ChatMessage) readIn;
+				Log.info("[Server] Received a chat message from " + 
+						chatMessage.getClientName() + ": " + chatMessage.getMessage());
+				this.broadcast(chatMessage);
 			}
 			else {
 				Log.err("[Server] We don't recognize this type of request: " + readIn.getClass());
 			}
 
 		} catch (Exception e) {
-			//e.printStackTrace();
+			e.printStackTrace();
 		}
+	}
+
+	private void dropClient(final Socket client) {
+		final ClientInfo clientInfo = this.clients.get(client);
+		IOUtils.closeQuietly(clientInfo.readIn);
+		IOUtils.closeQuietly(clientInfo.writeOut);
 	}
 
 	private void sendAnswer(final ChatClientRequestMessage request) {
@@ -161,6 +191,7 @@ public class ChatServer extends Thread {
 		for (final Socket client : this.clients.keySet()) {
 			clientInfo = this.clients.get(client);
 			if (clientInfo.id == clientId) {
+				Log.info("[Server] Sending ChatClientRequesMessage back to " + clientInfo.name);
 				try {
 					final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
@@ -168,24 +199,27 @@ public class ChatServer extends Thread {
 					objectOut.writeObject(request);
 
 					clientInfo.writeOut.write(out.toByteArray());
-
+					return;
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
 		}
+		Log.err("[Server] We did not find a Socket for client " + clientId);
 	}
 
-	private void broadcast(final SystemMessage sysMessage) {
+	private void broadcast(final Message message) {
 		try {
 			final ByteArrayOutputStream out = new ByteArrayOutputStream();
 
 			final ObjectOutput objectOut = new ObjectOutputStream(out);
-			objectOut.writeObject(sysMessage);
+			objectOut.writeObject(message);
 
 			for (final Socket client : this.clients.keySet()) {
-				Log.info("[Server] Broadcasting " + sysMessage.getMessage() + " to client " + this.clients.get(client).name);
-				this.clients.get(client).writeOut.write(out.toByteArray());
+				if (!client.isInputShutdown() && !client.isOutputShutdown()) {
+					Log.info("[Server] Broadcasting " + message.getMessage() + " to client " + this.clients.get(client).name);
+					this.clients.get(client).writeOut.write(out.toByteArray());
+				}
 			}
 		} catch (IOException e) {
 			e.printStackTrace();

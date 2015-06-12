@@ -7,4 +7,6 @@ public final class Request {
 	
 	public static final int USER_LIST = 0;
 	
+	public static final int DISCONNECT = 1;
+	
 }

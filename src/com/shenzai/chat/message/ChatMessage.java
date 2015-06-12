@@ -5,15 +5,21 @@ public class ChatMessage extends Message {
 	private static final long serialVersionUID = 1L;
 	
 	private int clientId;
+	private String clientName;
 	public long receivedAt = -1L;
 	
-	public ChatMessage(final int clientId, final String message) {
+	public ChatMessage(final int clientId, final String clientName, final String message) {
 		super(message);
 		this.clientId = clientId;
+		this.clientName = clientName;
 	}
 	
 	public int getClientId() {
 		return this.clientId;
+	}
+	
+	public String getClientName() {
+		return this.clientName;
 	}
 	
 	public boolean isReceived() {
