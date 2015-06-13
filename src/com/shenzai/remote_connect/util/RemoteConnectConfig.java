@@ -1,17 +1,17 @@
-package com.shenzai.chat_client.util;
+package com.shenzai.remote_connect.util;
 
 import java.awt.Font;
 import java.util.prefs.Preferences;
 
 import com.shenzai.chat_client.client.ChatClient;
 
-public class ChatClientConfig {
+public class RemoteConnectConfig {
 
-	public static final int PORT = 50500;
+	public static final int PORT = 50050;
 	private static final Font baseFont = new Font("Arial Unicode", Font.PLAIN, 12);
 	
 	private static Preferences prefs = Preferences.userNodeForPackage(ChatClient.class);
-	
+
 	public static void set(final String key, final String value) {
 		prefs.put(key, value);
 	}
