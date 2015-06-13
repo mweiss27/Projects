@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutput;
 import java.io.ObjectOutputStream;
+import java.io.StreamCorruptedException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -108,9 +109,14 @@ public class ChatServer extends Thread {
 
 									} while (len >= 0);
 								} catch (Exception any) {
-									Log.err("Exception on clientThread for " + clientName + ": " + any.getMessage());
+									Log.err("[Server] Exception on clientThread for " + clientName + ": " + any.getMessage());
+									any.printStackTrace();
+									if (connectedClient.isClosed() || connectedClient.isInputShutdown() || any instanceof StreamCorruptedException) {
+										break;
+									}
 								}
 							}
+							Log.err("[Server] " + clientName + " is no longer active.");
 						}
 					});
 
@@ -120,66 +126,61 @@ public class ChatServer extends Thread {
 			}
 	}
 
-	private void handleInput(final byte[] requestBytes) {
-		try {
-			final ByteArrayInputStream in = new ByteArrayInputStream(requestBytes);
-			final ObjectInputStream objectIn = new ObjectInputStream(in);
+	private void handleInput(final byte[] requestBytes) throws IOException, ClassNotFoundException {
+		final ByteArrayInputStream in = new ByteArrayInputStream(requestBytes);
+		final ObjectInputStream objectIn = new ObjectInputStream(in);
+		final Object readIn = objectIn.readObject();
+		if (readIn instanceof ChatClientRequestMessage) {
+			final ChatClientRequestMessage request = (ChatClientRequestMessage) readIn;
+			if (request.getMessage() != null && request.getMessage().matches("[\\d]+")) {
+				final int requestInteger = Integer.parseInt(request.getMessage());
+				switch(requestInteger) {
+				case Request.USER_LIST:
 
-			final Object readIn = objectIn.readObject();
-			if (readIn instanceof ChatClientRequestMessage) {
-				final ChatClientRequestMessage request = (ChatClientRequestMessage) readIn;
-				if (request.getMessage() != null && request.getMessage().matches("[\\d]+")) {
-					final int requestInteger = Integer.parseInt(request.getMessage());
-					switch(requestInteger) {
-						case Request.USER_LIST:
+					List<String> users = new ArrayList<>(this.clients.size());
 
-							List<String> users = new ArrayList<>(this.clients.size());
-
-							ClientInfo clientInfo;
-							for (final Socket client : this.clients.keySet()) {
-								clientInfo = this.clients.get(client);
-								users.add(clientInfo.name);
-							}
-
-							Log.info("[Server] Setting USER_LIST request answer to " + users);
-							request.setAnswer(users.toArray(new String[users.size()]));
-							this.sendAnswer(request);
-							break;
-						case Request.DISCONNECT:
-							final int clientId = request.getClientId();
-							Socket toDrop = null;
-							for (final Socket client : this.clients.keySet()) {
-								clientInfo = this.clients.get(client);
-								if (clientInfo.id == clientId) {
-									this.dropClient(client);
-									toDrop = client;
-									break;
-								}
-							}
-							if (toDrop != null) {
-								this.broadcast(new SystemMessage(this.clients.get(toDrop).name + " has disconnected."));
-								this.clients.remove(toDrop);
-							}
-							this.broadcast(new SystemMessage(REFRESH_USERS_MESSAGE));
-							break;
-						default:
-							Log.err("[Server] We don't recognize this request value: " + requestInteger);
+					ClientInfo clientInfo;
+					for (final Socket client : this.clients.keySet()) {
+						clientInfo = this.clients.get(client);
+						users.add(clientInfo.name);
 					}
+
+					Log.info("[Server] Setting USER_LIST request answer to " + users);
+					request.setAnswer(users.toArray(new String[users.size()]));
+					this.sendAnswer(request);
+					break;
+				case Request.DISCONNECT:
+					final int clientId = request.getClientId();
+					Socket toDrop = null;
+					for (final Socket client : this.clients.keySet()) {
+						clientInfo = this.clients.get(client);
+						if (clientInfo.id == clientId) {
+							this.dropClient(client);
+							toDrop = client;
+							break;
+						}
+					}
+					if (toDrop != null) {
+						this.broadcast(new SystemMessage(this.clients.get(toDrop).name + " has disconnected."));
+						this.clients.remove(toDrop);
+					}
+					this.broadcast(new SystemMessage(REFRESH_USERS_MESSAGE));
+					break;
+				default:
+					Log.err("[Server] We don't recognize this request value: " + requestInteger);
 				}
 			}
-			else if (readIn instanceof ChatMessage) {
-				final ChatMessage chatMessage = (ChatMessage) readIn;
-				Log.info("[Server] Received a chat message from " + 
-						chatMessage.getClientName() + ": " + chatMessage.getMessage());
-				this.broadcast(chatMessage);
-			}
-			else {
-				Log.err("[Server] We don't recognize this type of request: " + readIn.getClass());
-			}
-
-		} catch (Exception e) {
-			e.printStackTrace();
 		}
+		else if (readIn instanceof ChatMessage) {
+			final ChatMessage chatMessage = (ChatMessage) readIn;
+			Log.info("[Server] Received a chat message from " + 
+					chatMessage.getClientName() + ": " + chatMessage.getMessage());
+			this.broadcast(chatMessage);
+		}
+		else {
+			Log.err("[Server] We don't recognize this type of request: " + readIn.getClass());
+		}
+
 	}
 
 	private void dropClient(final Socket client) {
