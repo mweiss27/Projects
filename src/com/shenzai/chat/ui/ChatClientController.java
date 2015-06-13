@@ -6,9 +6,12 @@ import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.net.InetAddress;
-import java.util.concurrent.Future;
+import java.net.URL;
+import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
@@ -32,6 +35,11 @@ public class ChatClientController {
 
 	public ChatClientController(final ChatClientUI view) {
 		this.view = view;
+		try {
+			view.loginScreen.localIp = InetAddress.getLocalHost().getHostAddress();
+			view.loginScreen.externalIp = ChatClientController.this.getExternalAddress();
+		} catch (Exception e) {
+		}
 		this.initStartupScreen();
 	}
 
@@ -91,7 +99,8 @@ public class ChatClientController {
 				view.loginScreen.enterClientInfoPanel.setVisible(true);
 			}
 		});
-		view.loginScreen.loginButton.addMouseListener(new MouseAdapter() {
+		
+		this.view.loginScreen.loginButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (view.loginScreen.loginButton.isEnabled() && SwingUtilities.isLeftMouseButton(e)) {
@@ -108,7 +117,7 @@ public class ChatClientController {
 			}
 		});
 
-		view.loginScreen.backButton.addMouseListener(new MouseAdapter() {
+		this.view.loginScreen.backButton.addMouseListener(new MouseAdapter() {
 			@Override
 			public void mouseClicked(MouseEvent e) {
 				if (view.loginScreen.backButton.isEnabled() && SwingUtilities.isLeftMouseButton(e)) {
@@ -134,8 +143,18 @@ public class ChatClientController {
 				}
 			}
 		};
-		view.loginScreen.usernameField.addKeyListener(ka);
-		view.loginScreen.ipField.addKeyListener(ka);
+		
+		this.view.loginScreen.usernameField.addKeyListener(ka);
+		this.view.loginScreen.ipField.addKeyListener(ka);
+	}
+	
+	private String getExternalAddress() throws IOException {
+		URL ipAws = new URL("http://checkip.amazonaws.com");
+		BufferedReader in = new BufferedReader(new InputStreamReader(
+		                ipAws.openStream()));
+
+		String ip = in.readLine(); //you get the IP as a String
+		return ip.trim();
 	}
 	
 	private void loginAction() {

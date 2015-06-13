@@ -15,7 +15,6 @@ import java.awt.Rectangle;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -37,6 +36,8 @@ import com.shenzai.wrappers.swing.VerticalFlowPanel;
 public class LoginScreen extends JPanel {
 
 	public JPanel glassPane;
+	public String localIp = "N/A";
+	public String externalIp = "N/A";
 
 	public JButton startServer;
 	public JButton startClient;
@@ -106,10 +107,8 @@ public class LoginScreen extends JPanel {
 				super.paintComponent(g);
 
 				g.setColor(Color.LIGHT_GRAY);
-				try {
-					g.drawString("IP Address: " + InetAddress.getLocalHost().getHostAddress(), 10, 20);
-				} catch (UnknownHostException ignored) {
-				}
+				g.drawString("Local IP Address: " + localIp, 10, 20);
+				g.drawString("External IP Address: " + externalIp, 10, 35);
 
 			}
 		};
@@ -234,7 +233,7 @@ public class LoginScreen extends JPanel {
 				Point ipFieldLoc = ipField.getLocation();
 				ipFieldLoc = SwingUtilities.convertPoint(enterClientInfoPanel, ipFieldLoc, glassPane);
 				ipFieldLoc.translate(ipField.getWidth() + 5, ipField.getHeight()/4);
-				
+
 				invalidIpPanel.setLocation(ipFieldLoc);
 				invalidIpPanel.setSize(invalidIpPanel.getPreferredSize());
 				super.setVisible(aFlag);
