@@ -1,4 +1,4 @@
-package com.shenzai.chat.server;
+package com.shenzai.chat_client.server;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,11 +20,11 @@ import java.util.concurrent.Executors;
 
 import org.apache.commons.io.IOUtils;
 
-import com.shenzai.chat.message.ChatClientRequestMessage;
-import com.shenzai.chat.message.ChatMessage;
-import com.shenzai.chat.message.Message;
-import com.shenzai.chat.message.Request;
-import com.shenzai.chat.message.SystemMessage;
+import com.shenzai.chat_client.message.ChatClientRequestMessage;
+import com.shenzai.chat_client.message.ChatMessage;
+import com.shenzai.chat_client.message.Message;
+import com.shenzai.chat_client.message.Request;
+import com.shenzai.chat_client.message.SystemMessage;
 import com.shenzai.io.Log;
 
 public class ChatServer extends Thread {
@@ -35,7 +35,7 @@ public class ChatServer extends Thread {
 	private Map<Socket, ClientInfo> clients = new HashMap<>();
 	private ExecutorService clientThreads = Executors.newFixedThreadPool(10);
 	private ServerSocket server;
-
+	
 	public ChatServer(final int port) throws IOException {
 		this.server = new ServerSocket(port);
 		Log.info("[Server] Bound server to port: " + port);

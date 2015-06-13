@@ -1,4 +1,4 @@
-package com.shenzai.chat.util;
+package com.shenzai.chat_client.util;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;

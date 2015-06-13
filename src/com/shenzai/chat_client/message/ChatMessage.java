@@ -1,4 +1,4 @@
-package com.shenzai.chat.message;
+package com.shenzai.chat_client.message;
 
 public class ChatMessage extends Message {
 

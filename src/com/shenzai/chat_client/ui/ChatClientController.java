@@ -1,4 +1,4 @@
-package com.shenzai.chat.ui;
+package com.shenzai.chat_client.ui;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -11,17 +11,16 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.net.InetAddress;
 import java.net.URL;
-import java.net.UnknownHostException;
 import java.util.regex.Pattern;
 
 import javax.swing.SwingUtilities;
 
-import com.shenzai.chat.client.ChatClient;
-import com.shenzai.chat.server.ChatServer;
-import com.shenzai.chat.util.ChatClientConfig;
-import com.shenzai.chat.util.SwingUtil;
-import com.shenzai.chat.util.Time;
-import com.shenzai.chat.util.Worker;
+import com.shenzai.chat_client.client.ChatClient;
+import com.shenzai.chat_client.server.ChatServer;
+import com.shenzai.chat_client.util.ChatClientConfig;
+import com.shenzai.chat_client.util.SwingUtil;
+import com.shenzai.chat_client.util.Time;
+import com.shenzai.chat_client.util.Worker;
 import com.shenzai.io.Log;
 
 public class ChatClientController {

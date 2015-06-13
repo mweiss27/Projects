@@ -1,10 +1,10 @@
-package com.shenzai.chat.util;
+package com.shenzai.chat_client.util;
 
 import java.awt.Font;
 import java.net.InetAddress;
 import java.util.prefs.Preferences;
 
-import com.shenzai.chat.client.ChatClient;
+import com.shenzai.chat_client.client.ChatClient;
 
 public class ChatClientConfig {
 

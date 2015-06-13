@@ -1,4 +1,4 @@
-package com.shenzai.chat.ui.cards;
+package com.shenzai.chat_client.ui.cards;
 
 import java.awt.BorderLayout;
 import java.awt.Cursor;
@@ -18,8 +18,8 @@ import javax.swing.JTextPane;
 import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 
-import com.shenzai.chat.client.ChatClient;
-import com.shenzai.chat.util.ChatClientConfig;
+import com.shenzai.chat_client.client.ChatClient;
+import com.shenzai.chat_client.util.ChatClientConfig;
 import com.shenzai.io.Log;
 
 public class ChatWindow extends JPanel {
@@ -63,7 +63,7 @@ public class ChatWindow extends JPanel {
 		try {
 			this.sendButton = new JLabel(
 					new ImageIcon(ImageIO.read(this.getClass().getResourceAsStream(
-							"/com/shenzai/chat/resources/send_button.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+							"/com/shenzai/chat_client/resources/send_button.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
 		} catch (IOException e) {
 			Log.err("Error reading send_button.png");
 			this.sendButton = new JLabel(">");

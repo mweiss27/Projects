@@ -1,4 +1,4 @@
-package com.shenzai.chat.server;
+package com.shenzai.chat_client.server;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

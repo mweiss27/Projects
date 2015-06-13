@@ -1,4 +1,4 @@
-package com.shenzai.chat.ui;
+package com.shenzai.chat_client.ui;
 
 import java.awt.CardLayout;
 import java.io.IOException;
@@ -8,9 +8,9 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import com.shenzai.chat.ui.cards.ChatWindow;
-import com.shenzai.chat.ui.cards.LoginScreen;
-import com.shenzai.chat.util.SwingUtil;
+import com.shenzai.chat_client.ui.cards.ChatWindow;
+import com.shenzai.chat_client.ui.cards.LoginScreen;
+import com.shenzai.chat_client.util.SwingUtil;
 
 public class ChatClientUI extends JFrame {
 
@@ -24,7 +24,7 @@ public class ChatClientUI extends JFrame {
 	public ChatClientUI() {
 		super("Shenzai's Chat Client");
 		try {
-			this.setIconImage(ImageIO.read(ChatClientUI.class.getResourceAsStream("/com/shenzai/chat/resources/chat_bubble.png")));
+			this.setIconImage(ImageIO.read(ChatClientUI.class.getResourceAsStream("/com/shenzai/chat_client/resources/chat_bubble.png")));
 		} catch (IOException e) {
 			System.err.println("Error reading chat_bubble.png");
 		}

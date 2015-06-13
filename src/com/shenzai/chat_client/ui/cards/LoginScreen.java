@@ -1,4 +1,4 @@
-package com.shenzai.chat.ui.cards;
+package com.shenzai.chat_client.ui.cards;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -28,8 +28,8 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import com.shenzai.chat.ui.ChatClientUI;
-import com.shenzai.chat.util.ChatClientConfig;
+import com.shenzai.chat_client.ui.ChatClientUI;
+import com.shenzai.chat_client.util.ChatClientConfig;
 import com.shenzai.wrappers.swing.FlowPanel;
 import com.shenzai.wrappers.swing.VerticalFlowPanel;
 
@@ -259,7 +259,7 @@ public class LoginScreen extends JPanel {
 			this.loginButton = new JLabel(
 					new ImageIcon(
 							ImageIO.read(
-									this.getClass().getResourceAsStream("/com/shenzai/chat/resources/login_button.png")
+									this.getClass().getResourceAsStream("/com/shenzai/chat_client/resources/login_button.png")
 									).getScaledInstance(20, 20, Image.SCALE_SMOOTH)
 							)
 					);
@@ -272,7 +272,7 @@ public class LoginScreen extends JPanel {
 			this.backButton = new JLabel(
 					new ImageIcon(
 							ImageIO.read(
-									this.getClass().getResourceAsStream("/com/shenzai/chat/resources/login_back.png")
+									this.getClass().getResourceAsStream("/com/shenzai/chat_client/resources/login_back.png")
 									).getScaledInstance(20, 20, Image.SCALE_SMOOTH)
 							)
 					);
@@ -312,7 +312,7 @@ public class LoginScreen extends JPanel {
 
 	private Image[] loadLoadingSprites() {
 		try {
-			final BufferedImage sprite = ImageIO.read(ChatClientUI.class.getResourceAsStream("/com/shenzai/chat/resources/loadingSprites.png"));
+			final BufferedImage sprite = ImageIO.read(ChatClientUI.class.getResourceAsStream("/com/shenzai/chat_client/resources/loadingSprites.png"));
 			final int width = sprite.getWidth();
 			final int SPRITE_WIDTH = 128;
 			if (width % SPRITE_WIDTH == 0) {

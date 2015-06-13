@@ -1,10 +1,10 @@
-package com.shenzai.chat;
+package com.shenzai.chat_client;
 
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 
-import com.shenzai.chat.ui.ChatClientController;
-import com.shenzai.chat.ui.ChatClientUI;
+import com.shenzai.chat_client.ui.ChatClientController;
+import com.shenzai.chat_client.ui.ChatClientUI;
 
 
 public class Boot {

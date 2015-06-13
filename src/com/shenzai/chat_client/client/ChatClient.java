@@ -1,4 +1,4 @@
-package com.shenzai.chat.client;
+package com.shenzai.chat_client.client;
 
 import java.awt.event.KeyAdapter;
 import java.awt.event.KeyEvent;
@@ -30,15 +30,15 @@ import javax.swing.SwingUtilities;
 
 import org.apache.commons.io.IOUtils;
 
-import com.shenzai.chat.message.ChatClientRequestMessage;
-import com.shenzai.chat.message.ChatMessage;
-import com.shenzai.chat.message.Message;
-import com.shenzai.chat.message.MessageReceivedEvent;
-import com.shenzai.chat.message.Request;
-import com.shenzai.chat.message.SystemMessage;
-import com.shenzai.chat.server.ChatServer;
-import com.shenzai.chat.ui.cards.ChatWindow;
-import com.shenzai.chat.util.Worker;
+import com.shenzai.chat_client.message.ChatClientRequestMessage;
+import com.shenzai.chat_client.message.ChatMessage;
+import com.shenzai.chat_client.message.Message;
+import com.shenzai.chat_client.message.MessageReceivedEvent;
+import com.shenzai.chat_client.message.Request;
+import com.shenzai.chat_client.message.SystemMessage;
+import com.shenzai.chat_client.server.ChatServer;
+import com.shenzai.chat_client.ui.cards.ChatWindow;
+import com.shenzai.chat_client.util.Worker;
 import com.shenzai.io.Log;
 
 public class ChatClient {
