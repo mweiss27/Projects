@@ -10,17 +10,23 @@ import java.awt.Graphics2D;
 import java.awt.RenderingHints;
 import java.awt.event.ActionEvent;
 import java.util.Arrays;
+import java.util.function.Consumer;
 
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
+import javax.swing.ButtonGroup;
 import javax.swing.JButton;
 import javax.swing.JPanel;
+import javax.swing.JRadioButton;
 import javax.swing.KeyStroke;
 import javax.swing.SwingUtilities;
 
+import com.shenzai.algorithms.convexhull.algorithms.GiftWrap;
+import com.shenzai.algorithms.convexhull.algorithms.QuickHull;
 import com.shenzai.algorithms.util.AlgorithmsConfig;
 import com.shenzai.wrappers.Point;
 import com.shenzai.wrappers.swing.FlowPanel;
+import com.shenzai.wrappers.swing.VerticalFlowPanel;
 
 public class PointMapUI extends JPanel {
 	
@@ -28,6 +34,8 @@ public class PointMapUI extends JPanel {
 	public final JPanel controlButtons;
 	public final JButton generateNewPoints;
 	public final JButton generateSolution;
+	public final ButtonGroup algorithmSelecter;
+	public final JRadioButton[] algorithms;
 	
 	private Point[] allPoints;
 	private Point[] solution;
@@ -50,10 +58,6 @@ public class PointMapUI extends JPanel {
 					drawSolution(solution, g);
 				}
 				
-//				if (endPoints != null) {
-//					g.setColor(Color.LIGHT_GRAY);
-//					g.drawLine(endPoints[0].x, endPoints[0].y, endPoints[1].x, endPoints[1].y);
-//				}
 			}
 		};
 		this.pointView.setPreferredSize(size);
@@ -81,14 +85,45 @@ public class PointMapUI extends JPanel {
 		this.controlButtons = new FlowPanel(FlowLayout.CENTER, 3, this.generateNewPoints, this.generateSolution);
 		this.controlButtons.setBorder(BorderFactory.createMatteBorder(1, 0, 0, 0, Color.LIGHT_GRAY));
 		
+		this.algorithms = new JRadioButton[2];
+		
+		this.algorithms[0] = new JRadioButton("Quick Hull");
+		this.algorithms[0].setName(QuickHull.class.getName());
+		this.algorithms[0].setSelected(true);
+		
+		this.algorithms[1] = new JRadioButton("Gift Wrapping");
+		this.algorithms[1].setName(GiftWrap.class.getName());
+		
+		this.algorithmSelecter = new ButtonGroup();
+		Arrays.asList(this.algorithms).forEach(new Consumer<JRadioButton>() {
+			@Override
+			public void accept(JRadioButton t) {
+				PointMapUI.this.algorithmSelecter.add(t);
+			}
+		});
+		
 		this.add(this.pointView, BorderLayout.CENTER);
-		this.add(this.controlButtons, BorderLayout.SOUTH);
+		
+		final JPanel southContainer = new VerticalFlowPanel(FlowLayout.CENTER, 0);
+		southContainer.add(this.controlButtons);
+		southContainer.add(new FlowPanel(FlowLayout.CENTER, 0, this.algorithms));
+		
+		this.add(southContainer, BorderLayout.SOUTH);
 	}
 	
-	public void setModel(final PointMap model) {
-		this.allPoints = model.getPoints();
-		this.solution = model.getSolution();
-		//this.endPoints = model.endPoints;
+	public void setPoints(final Point[] points) {
+		this.allPoints = points;
+		this.solution = null;
+		SwingUtilities.invokeLater(new Runnable() {
+			@Override
+			public void run() {
+				PointMapUI.this.repaint();
+			}
+		});
+	}
+	
+	public void setSolution(final Point[] solution) {
+		this.solution = solution;
 		SwingUtilities.invokeLater(new Runnable() {
 			@Override
 			public void run() {
@@ -103,7 +138,7 @@ public class PointMapUI extends JPanel {
 			gr.setFont(AlgorithmsConfig.getFont(7f));
 			for (final Point p : allPoints) {
 				gr.fillOval(p.x-2, p.y-2, 4, 4);
-				//gr.drawString(p.toString(), p.x-15, p.y+15);
+				gr.drawString(p.toString(), p.x-15, p.y+15);
 			}
 			
 			gr.dispose();

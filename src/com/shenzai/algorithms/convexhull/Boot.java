@@ -24,7 +24,7 @@ public class Boot {
 				final PointMap model = new PointMap(25, size);
 				new ConvexHullController(view, model);
 				
-				view.setModel(model);
+				view.setPoints(model.getPoints());
 				
 				final JFrame window = new JFrame("Convex Hull Algorithm");
 				

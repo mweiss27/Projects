@@ -47,9 +47,13 @@ public class Point {
 		return true;
 	}
 
+	public String toStringOnlyThis() {
+		return "(" + this.x + ", " + this.y + ")";
+	}
+	
 	@Override
 	public String toString() {
-		return "(" + this.x + ", " + this.y + ") -> " + (this.next == null ? "null" : "(" + this.next.x + ", " + this.next.y + ")");
+		return this.toStringOnlyThis() + " -> " + (this.next == null ? "null" : "(" + this.next.x + ", " + this.next.y + ")");
 	}
 	
 }
