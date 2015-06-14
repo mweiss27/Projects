@@ -46,6 +46,10 @@ public class PointMap {
 			this.solution = this.points;
 		}
 
+		this.quickHull();
+	}
+	
+	private void quickHull() {
 		Point minX = null, maxX = null;
 
 		for (final Point p : this.points) {
@@ -79,39 +83,14 @@ public class PointMap {
 		
 		
 		Log.info("Initial hull on lower");
-		hull(new Point[] { minX, maxX }, hullPoints, lower);
+		this.quickhull(new Point[] { minX, maxX }, hullPoints, lower);
 		Log.info("Initial hull on upper");
-		hull(new Point[] { maxX, minX }, hullPoints, upper);
+		this.quickhull(new Point[] { maxX, minX }, hullPoints, upper);
 		
 		this.solution = hullPoints.toArray(new Point[hullPoints.size()]);
 	}
-	
-	/**
-	 * Filters all points that are "below" (in the Swing co-ord sense), so physically higher on the screen
-	 * We're checking for a negative cross product
-	 * 
-	 * x -> 	y
-	 * 			|
-	 * 			v
-	 * 
-	 */
-	private static void partition(final Point[] allPoints, final Point[] endPoints, 
-			final List<Point> result) {
-		final Point p1Vector = new Point(endPoints[1].x - endPoints[0].x, endPoints[1].y - endPoints[0].y);
-		final Point p2Vector = new Point();
-		for (final Point p : allPoints) {
-			if (!p.equals(endPoints[0]) && !p.equals(endPoints[1])) {
-				p2Vector.x = p.x - endPoints[0].x;
-				p2Vector.y = p.y - endPoints[0].y;
-				final int cross = cross(p1Vector, p2Vector);
-				if (cross <= 0) {
-					result.add(p);
-				}
-			}
-		}
-	}
 
-	private void hull(final Point[] endPoints, final List<Point> hullPoints, final List<Point> includedPoints) {
+	private void quickhull(final Point[] endPoints, final List<Point> hullPoints, final List<Point> includedPoints) {
 		
 		if (includedPoints.size() == 0) {
 			Log.err("includedPoints#size is 0");
@@ -160,14 +139,39 @@ public class PointMap {
 		
 		Point[] newEndPoints = new Point[] { endPoints[0], farthestPoint };
 		partition(includedPoints.toArray(new Point[includedPoints.size()]), newEndPoints, newIncludedPoints);
-		hull(newEndPoints, hullPoints, newIncludedPoints);
+		quickhull(newEndPoints, hullPoints, newIncludedPoints);
 		
 		newIncludedPoints.clear();
 		
 		newEndPoints = new Point[] { farthestPoint, endPoints[1] };
 		partition(includedPoints.toArray(new Point[includedPoints.size()]), newEndPoints, newIncludedPoints);
-		hull(newEndPoints, hullPoints, newIncludedPoints);
+		quickhull(newEndPoints, hullPoints, newIncludedPoints);
 		
+	}
+	
+	/**
+	 * Filters all points that are "below" (in the Swing co-ord sense), so physically higher on the screen
+	 * We're checking for a negative cross product
+	 * 
+	 * x -> 	y
+	 * 			|
+	 * 			v
+	 * 
+	 */
+	private static void partition(final Point[] allPoints, final Point[] endPoints, 
+			final List<Point> result) {
+		final Point p1Vector = new Point(endPoints[1].x - endPoints[0].x, endPoints[1].y - endPoints[0].y);
+		final Point p2Vector = new Point();
+		for (final Point p : allPoints) {
+			if (!p.equals(endPoints[0]) && !p.equals(endPoints[1])) {
+				p2Vector.x = p.x - endPoints[0].x;
+				p2Vector.y = p.y - endPoints[0].y;
+				final int cross = cross(p1Vector, p2Vector);
+				if (cross <= 0) {
+					result.add(p);
+				}
+			}
+		}
 	}
 
 	private static double computeDistanceFromLine(final Point p, final Point[] endPoints) {

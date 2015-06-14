@@ -21,7 +21,7 @@ public class Boot {
 			public void run() {
 				final Dimension size = new Dimension(600, 500);
 				final PointMapUI view = new PointMapUI(size);
-				final PointMap model = new PointMap(8, size);
+				final PointMap model = new PointMap(25, size);
 				new ConvexHullController(view, model);
 				
 				view.setModel(model);
