@@ -19,9 +19,9 @@ public class Boot {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
-				final Dimension size = new Dimension(400, 400);
+				final Dimension size = new Dimension(600, 500);
 				final PointMapUI view = new PointMapUI(size);
-				final PointMap model = new PointMap(45, size);
+				final PointMap model = new PointMap(8, size);
 				new ConvexHullController(view, model);
 				
 				view.setModel(model);
