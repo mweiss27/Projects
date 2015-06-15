@@ -10,14 +10,8 @@ import java.util.Arrays;
 import javax.swing.Box;
 import javax.swing.JPanel;
 
-
-/*
- * This class is filled with different kinds of FlowPanels. 
- * Some of them extend from each other, but they are all very similar.
- */
-
 /**
- * A JPanel that has a FlowLayout with the given arguments.
+ * A JPanel with a nicer implementation of FlowLayout for my purposes
  */
 public class FlowPanel extends JPanel {
 

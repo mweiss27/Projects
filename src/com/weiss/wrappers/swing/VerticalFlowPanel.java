@@ -11,7 +11,7 @@ import javax.swing.Box;
 import javax.swing.JPanel;
 
 /**
- * A VerticalFlowPanel, but with a background equal to that of Colors.COLOR_PANEL_BACKGROUND
+ * A JPanel with a nicer implementation of BoxLayout(Y_AXIS) for my purposes
  */
 public class VerticalFlowPanel extends JPanel {
 
