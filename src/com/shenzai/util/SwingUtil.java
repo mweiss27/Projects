@@ -1,4 +1,4 @@
-package com.shenzai.remote_connect.util;
+package com.shenzai.util;
 
 import java.awt.CardLayout;
 import java.awt.Component;

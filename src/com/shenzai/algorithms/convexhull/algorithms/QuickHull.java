@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import com.shenzai.io.Log;
+import com.shenzai.util.Time;
 import com.shenzai.wrappers.Point;
 
 public class QuickHull extends CHAlgorithm {
@@ -17,6 +18,7 @@ public class QuickHull extends CHAlgorithm {
 	
 	@Override
 	public Point[] generateConvexHull() {
+		Time.tic();
 		final List<Point> hullPoints = new ArrayList<>(this.points.size());
 		
 		Point minX = null, maxX = null;
@@ -51,7 +53,9 @@ public class QuickHull extends CHAlgorithm {
 		Log.info("Initial hull on upper");
 		this.quickhull(new Point[] { maxX, minX }, hullPoints, upper);
 		
-		return hullPoints.toArray(new Point[hullPoints.size()]);
+		final Point[] result = hullPoints.toArray(new Point[hullPoints.size()]);
+		System.out.println("QuickHull computed " + result.length + " convex points in " + Time.toc() + "ms.");
+		return result;
 	}
 
 	private void quickhull(final Point[] endPoints, final List<Point> hullPoints, final List<Point> includedPoints) {

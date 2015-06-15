@@ -18,10 +18,10 @@ import javax.swing.SwingUtilities;
 import com.shenzai.chat_client.client.ChatClient;
 import com.shenzai.chat_client.server.ChatServer;
 import com.shenzai.chat_client.util.ChatClientConfig;
-import com.shenzai.chat_client.util.SwingUtil;
-import com.shenzai.chat_client.util.Time;
-import com.shenzai.chat_client.util.Worker;
 import com.shenzai.io.Log;
+import com.shenzai.util.SwingUtil;
+import com.shenzai.util.Time;
+import com.shenzai.util.Worker;
 
 public class ChatClientController {
 

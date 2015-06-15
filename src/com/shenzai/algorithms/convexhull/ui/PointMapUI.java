@@ -138,7 +138,7 @@ public class PointMapUI extends JPanel {
 			gr.setFont(AlgorithmsConfig.getFont(7f));
 			for (final Point p : allPoints) {
 				gr.fillOval(p.x-2, p.y-2, 4, 4);
-				gr.drawString(p.toString(), p.x-15, p.y+15);
+				// gr.drawString(p.toString(), p.x-15, p.y+15);
 			}
 			
 			gr.dispose();

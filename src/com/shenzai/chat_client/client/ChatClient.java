@@ -38,8 +38,8 @@ import com.shenzai.chat_client.message.Request;
 import com.shenzai.chat_client.message.SystemMessage;
 import com.shenzai.chat_client.server.ChatServer;
 import com.shenzai.chat_client.ui.cards.ChatWindow;
-import com.shenzai.chat_client.util.Worker;
 import com.shenzai.io.Log;
+import com.shenzai.util.Worker;
 
 public class ChatClient {
 

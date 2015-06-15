@@ -6,12 +6,11 @@ import java.awt.event.ActionListener;
 import javax.swing.JRadioButton;
 
 import com.shenzai.algorithms.convexhull.algorithms.CHAlgorithm;
-import com.shenzai.remote_connect.util.Worker;
+import com.shenzai.util.Worker;
 
 
 public class ConvexHullController {
 
-	
 	public ConvexHullController(final PointMapUI view, final PointMap model) {
 		
 		view.generateNewPoints.addActionListener(new ActionListener() {

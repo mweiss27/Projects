@@ -10,7 +10,7 @@ import javax.swing.WindowConstants;
 
 import com.shenzai.chat_client.ui.cards.ChatWindow;
 import com.shenzai.chat_client.ui.cards.LoginScreen;
-import com.shenzai.chat_client.util.SwingUtil;
+import com.shenzai.util.SwingUtil;
 
 public class ChatClientUI extends JFrame {
 

@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 
 import com.shenzai.io.Log;
+import com.shenzai.util.Time;
 import com.shenzai.wrappers.Point;
 
 public class GiftWrap extends CHAlgorithm {
@@ -14,6 +15,7 @@ public class GiftWrap extends CHAlgorithm {
 	}
 
 	public Point[] generateConvexHull() {
+		Time.tic();
 		Log.info("Generating a GiftWrap convex hull");
 		final List<Point> hullPoints = new ArrayList<>();
 
@@ -26,7 +28,9 @@ public class GiftWrap extends CHAlgorithm {
 
 		this.giftWrap(farthestLeft, hullPoints);
 
-		return hullPoints.toArray(new Point[hullPoints.size()]);
+		final Point[] result = hullPoints.toArray(new Point[hullPoints.size()]);
+		System.out.println("GiftWrap computed " + result.length + " convex points in " + Time.toc() + "ms.");
+		return result;
 	}
 
 	private void giftWrap(final Point farthestLeft, final List<Point> hullPoints) {
