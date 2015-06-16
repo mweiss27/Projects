@@ -12,7 +12,7 @@ public class Boot {
 		SwingUtilities.invokeAndWait(new Runnable() {
 			@Override
 			public void run() {
-				
+				System.out.println("Test");
 			}
 		});
 	}
