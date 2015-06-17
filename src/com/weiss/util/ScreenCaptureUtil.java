@@ -26,7 +26,7 @@ public class ScreenCaptureUtil {
 	private static final Dimension _1080p = new Dimension(1920, 1080);
 	private static final Dimension _1440p = new Dimension(2560, 1440);
 
-	private static final Dimension SCREEN = _1440p;
+	private static final Dimension SCREEN = _1080p;
 	public final Rectangle WINDOW = new Rectangle(0, 0, SCREEN.width, SCREEN.height);
 
 	private ExecutorService exec = Executors.newSingleThreadExecutor();
