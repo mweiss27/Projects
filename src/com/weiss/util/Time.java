@@ -28,23 +28,31 @@ public class Time {
 		return format.format(new Date(millis));
 	}
 
-	public static long tic() {
+	public static long tic(final Thread t) {
 		final long currentMillis = System.currentTimeMillis();
 
-		ticTocMap.put(Thread.currentThread(), new SimpleEntry<>(currentMillis, -1L));
+		ticTocMap.put(t, new SimpleEntry<>(currentMillis, -1L));
 
 		return currentMillis;
 	}
+	
+	public static long tic() {
+		return tic(Thread.currentThread());
+	}
 
 	public static long toc() {
+		return toc(Thread.currentThread());
+	}
+	
+	public static long toc(final Thread t) {
 		final long currentMillis = System.currentTimeMillis();
 
-		if (!ticTocMap.containsKey(Thread.currentThread())) {
+		if (!ticTocMap.containsKey(t)) {
 			throw new IllegalStateException("tic was not called from this Thread prior to toc");
 		}
 
-		final long result = currentMillis - ticTocMap.get(Thread.currentThread()).getKey();
-		ticTocMap.remove(Thread.currentThread());
+		final long result = currentMillis - ticTocMap.get(t).getKey();
+		ticTocMap.remove(t);
 		return result;
 	}
 

@@ -27,6 +27,10 @@ import com.weiss.chat_client.message.Request;
 import com.weiss.chat_client.message.SystemMessage;
 import com.weiss.io.Log;
 
+/**
+ * A multi-threaded server to allow multiple [infinite] clients to connect
+ * and chat.
+ */
 public class ChatServer extends Thread {
 
 	public static final String SHUTDOWN_MESSAGE = ".shutdown";
