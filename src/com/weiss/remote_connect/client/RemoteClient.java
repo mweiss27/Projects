@@ -3,7 +3,6 @@ package com.weiss.remote_connect.client;
 import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
@@ -15,6 +14,7 @@ import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -44,7 +44,9 @@ public class RemoteClient extends JFrame {
 	private ExecutorService exec = Executors.newFixedThreadPool(1);
 
 	public RemoteClient(final InetAddress address, final int port) throws IOException {
-		this.client = new Socket(address, port);
+		Log.info("[Client] Attempting to connect to " + address.getHostAddress() + ":" + port);
+		this.client = new Socket();
+		this.client.connect(new InetSocketAddress(address, port), 5000);
 
 		final BufferedImage cursorImg = ImageIO.read(this.getClass().getResourceAsStream("/com/weiss/remote_connect/resources/cursor-24.png"));
 		
