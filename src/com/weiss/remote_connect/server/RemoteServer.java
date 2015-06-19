@@ -12,6 +12,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.net.DatagramPacket;
+import java.net.InetAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.ExecutorService;
@@ -30,7 +31,7 @@ import com.weiss.remote_connect.util.RemoteConnectConfig;
 public class RemoteServer {
 
 	private volatile boolean running = false;
-	
+
 	private final ServerSocket server;
 	private Socket connectedClient;
 
@@ -43,6 +44,7 @@ public class RemoteServer {
 	private ExecutorService exec = Executors.newFixedThreadPool(2);
 
 	public RemoteServer(final int port) throws IOException {
+		Log.info("[Server] Creating server at " + InetAddress.getLocalHost().getHostAddress() + ":" + port);
 		this.server = new ServerSocket(RemoteConnectConfig.PORT);
 
 		this.screen.setSize(new Dimension(1920, 1080));
@@ -78,27 +80,31 @@ public class RemoteServer {
 									final DataInputStream readIn = new DataInputStream(RemoteServer.this.connectedClient.getInputStream());
 
 									do {
-										readIn.read(buffer);
+										try {
+											readIn.read(buffer);
 
-										final Object o = RemoteServer.this.deserialize(buffer);
+											final Object o = RemoteServer.this.deserialize(buffer);
 
-										if (o == null) {
-											Log.err("We received a null object.");
-											continue;
-										}
+											if (o == null) {
+												Log.err("We received a null object.");
+												continue;
+											}
 
-										if (!(o instanceof Packet)) {
-											Log.err("We received an object, but it isn't a Packet: " + o.getClass());
-											continue;
-										}
+											if (!(o instanceof Packet)) {
+												Log.err("We received an object, but it isn't a Packet: " + o.getClass());
+												continue;
+											}
 
-										if (o instanceof MouseEventPacket) {
-											Log.info("We received a MouseEventPacket: " + o.toString());
-											final MouseEventPacket mouseEventPacket = (MouseEventPacket) o;
-											mouseEventPacket.handleEvent(RemoteServer.this.robot);
-										}
-										else {
-											Log.err("We received a Packet, but we don't recognize it: " + o.getClass());
+											if (o instanceof MouseEventPacket) {
+												Log.info("We received a MouseEventPacket: " + o.toString());
+												final MouseEventPacket mouseEventPacket = (MouseEventPacket) o;
+												mouseEventPacket.handleEvent(RemoteServer.this.robot);
+											}
+											else {
+												Log.err("We received a Packet, but we don't recognize it: " + o.getClass());
+											}
+										} catch (Exception any) {
+											any.printStackTrace();
 										}
 
 									} while (!RemoteServer.this.server.isClosed());
@@ -112,15 +118,15 @@ public class RemoteServer {
 							@Override
 							public void run() {
 								try {
-									
+
 									final DataOutputStream writeOut = new DataOutputStream(RemoteServer.this.connectedClient.getOutputStream());
-									
+
 									do {
 										RemoteServer.this.screenCapture = RemoteServer.this.robot.createScreenCapture(RemoteServer.this.screen);
 										RemoteServer.this.mouseLocation = MouseInfo.getPointerInfo().getLocation();
-										
+
 										final DatagramPacket packet = new FramePacket(RemoteServer.this.screenCapture, RemoteServer.this.mouseLocation).get();
-										
+
 										if (!RemoteServer.this.connectedClient.isClosed() && !RemoteServer.this.connectedClient.isOutputShutdown()) {
 											//System.out.println("[Server] Sending " + packet.getLength() + " bytes.");
 											writeOut.writeInt(packet.getData().length);
@@ -136,7 +142,7 @@ public class RemoteServer {
 
 						inputThread.get();
 						outputThread.get();
-						
+
 					} catch (final Exception e) {
 						e.printStackTrace();
 					}
