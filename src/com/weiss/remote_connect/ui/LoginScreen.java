@@ -1,4 +1,4 @@
-package com.weiss.chat_client.ui.cards;
+package com.weiss.remote_connect.ui;
 
 import java.awt.Color;
 import java.awt.Cursor;
@@ -28,8 +28,7 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
-import com.weiss.chat_client.ui.ChatClientUI;
-import com.weiss.chat_client.util.ChatClientConfig;
+import com.weiss.remote_connect.util.RemoteConnectConfig;
 import com.weiss.wrappers.swing.FlowPanel;
 import com.weiss.wrappers.swing.VerticalFlowPanel;
 
@@ -52,7 +51,6 @@ public class LoginScreen extends JPanel {
 	public JTextField ipField;
 
 	public JPanel enterClientInfoPanel;
-	public JTextField usernameField;
 
 	public JLabel backButton;
 	public JLabel loginButton;
@@ -121,11 +119,11 @@ public class LoginScreen extends JPanel {
 
 		this.startServer = new JButton("Start Server");
 		this.startServer.setFocusPainted(false);
-		this.startServer.setFont(ChatClientConfig.getFont(15f));
+		this.startServer.setFont(RemoteConnectConfig.getFont(15f));
 
 		this.startClient = new JButton("Start Client");
 		this.startClient.setFocusPainted(false);
-		this.startClient.setFont(ChatClientConfig.getFont(15f));
+		this.startClient.setFont(RemoteConnectConfig.getFont(15f));
 
 		gbc.insets = new Insets(0, 3, 0, 3);
 
@@ -174,7 +172,7 @@ public class LoginScreen extends JPanel {
 			}
 
 		};
-		this.connectingToServer.setFont(ChatClientConfig.getFont(18f));
+		this.connectingToServer.setFont(RemoteConnectConfig.getFont(18f));
 		this.connectingToServer.setMinimumSize(this.connectingToServer.getPreferredSize());
 		this.connectingToServer.setVisible(true);
 
@@ -196,16 +194,16 @@ public class LoginScreen extends JPanel {
 		gbc2.weighty = 1D;
 		this.loadingPanel.add(this.loadingGif, gbc2);
 
-		final JLabel serverAlreadyStartedLabel = new JLabel("A server is already bound to port " + ChatClientConfig.PORT);
-		serverAlreadyStartedLabel.setFont(ChatClientConfig.getFont(Font.BOLD, 18f));
+		final JLabel serverAlreadyStartedLabel = new JLabel("A server is already bound to port " + RemoteConnectConfig.PORT);
+		serverAlreadyStartedLabel.setFont(RemoteConnectConfig.getFont(Font.BOLD, 18f));
 		serverAlreadyStartedLabel.setForeground(Color.red);
 
 		this.serverAlreadyStartedPanel = new JPanel(new GridBagLayout());
 		this.serverAlreadyStartedPanel.setOpaque(false);
 		this.serverAlreadyStartedPanel.add(serverAlreadyStartedLabel);
 
-		final JLabel serverStartedSuccessfullyLabel = new JLabel("<html><center>Server bound to<br />%IP%:" + ChatClientConfig.PORT + "</center></html>");
-		serverStartedSuccessfullyLabel.setFont(ChatClientConfig.getFont(Font.BOLD, 18f));
+		final JLabel serverStartedSuccessfullyLabel = new JLabel("<html><center>Server bound to<br />%IP%:" + RemoteConnectConfig.PORT + "</center></html>");
+		serverStartedSuccessfullyLabel.setFont(RemoteConnectConfig.getFont(Font.BOLD, 18f));
 		serverStartedSuccessfullyLabel.setForeground(Color.green.darker());
 
 		try {
@@ -215,8 +213,8 @@ public class LoginScreen extends JPanel {
 			serverStartedSuccessfullyLabel.setText(serverStartedSuccessfullyLabel.getText().replace("%IP%", ""));
 		}
 
-		this.clientConnectFailedLabel = new JLabel("<html><center>Failed to connect to server at<br />%IP%:" + ChatClientConfig.PORT + "</center></html>");
-		this.clientConnectFailedLabel.setFont(ChatClientConfig.getFont(Font.BOLD, 18f));
+		this.clientConnectFailedLabel = new JLabel("<html><center>Failed to connect to server at<br />%IP%:" + RemoteConnectConfig.PORT + "</center></html>");
+		this.clientConnectFailedLabel.setFont(RemoteConnectConfig.getFont(Font.BOLD, 18f));
 		this.clientConnectFailedLabel.setForeground(Color.red);
 
 		this.serverStartedSuccessfullyPanel = new JPanel(new GridBagLayout());
@@ -240,10 +238,9 @@ public class LoginScreen extends JPanel {
 			}
 		};
 
-		this.usernameField = new JTextField(ChatClientConfig.get("user"), 15);
 		this.ipField = new JTextField(15);
 		try {
-			this.ipField.setText(ChatClientConfig.get("server_ip", InetAddress.getLocalHost().getHostAddress()));
+			this.ipField.setText(RemoteConnectConfig.get("server_ip", InetAddress.getLocalHost().getHostAddress()));
 		} catch (Exception ignored){
 			ignored.printStackTrace();
 		}
@@ -253,13 +250,11 @@ public class LoginScreen extends JPanel {
 		this.enterClientInfoPanel.add(new JLabel("Enter Server Address"));
 		this.enterClientInfoPanel.add(this.ipField);
 
-		this.enterClientInfoPanel.add(new JLabel("Enter a Username")); //intentional spaces
-
 		try {
 			this.loginButton = new JLabel(
 					new ImageIcon(
 							ImageIO.read(
-									this.getClass().getResourceAsStream("/com/weiss/chat_client/resources/login_button.png")
+									this.getClass().getResourceAsStream("/com/weiss/remote_connect/resources/login_button.png")
 									).getScaledInstance(20, 20, Image.SCALE_SMOOTH)
 							)
 					);
@@ -272,7 +267,7 @@ public class LoginScreen extends JPanel {
 			this.backButton = new JLabel(
 					new ImageIcon(
 							ImageIO.read(
-									this.getClass().getResourceAsStream("/com/weiss/chat_client/resources/login_back.png")
+									this.getClass().getResourceAsStream("/com/weiss/remote_connect/resources/login_back.png")
 									).getScaledInstance(20, 20, Image.SCALE_SMOOTH)
 							)
 					);
@@ -286,9 +281,6 @@ public class LoginScreen extends JPanel {
 
 		this.backButton.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
 		this.backButton.setToolTipText("Cancel");
-
-		this.enterClientInfoPanel.add(this.usernameField);
-		this.enterClientInfoPanel.add(new FlowPanel(FlowLayout.CENTER, 3, this.backButton, this.loginButton), FlowLayout.CENTER);
 
 		this.invalidIpPanel = new JPanel(new GridBagLayout());
 		this.invalidIpPanel.add(new JLabel("Invalid IP Address")
@@ -312,7 +304,7 @@ public class LoginScreen extends JPanel {
 
 	private Image[] loadLoadingSprites() {
 		try {
-			final BufferedImage sprite = ImageIO.read(ChatClientUI.class.getResourceAsStream("/com/weiss/chat_client/resources/loadingSprites.png"));
+			final BufferedImage sprite = ImageIO.read(LoginScreen.class.getResourceAsStream("/com/weiss/remote_connect/resources/loadingSprites.png"));
 			final int width = sprite.getWidth();
 			final int SPRITE_WIDTH = 128;
 			if (width % SPRITE_WIDTH == 0) {

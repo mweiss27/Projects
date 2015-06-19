@@ -42,8 +42,8 @@ public class RemoteClient extends JFrame {
 
 	private ExecutorService exec = Executors.newFixedThreadPool(1);
 
-	public RemoteClient(final int port) throws IOException {
-		this.client = new Socket(InetAddress.getLocalHost(), port);
+	public RemoteClient(final InetAddress address, final int port) throws IOException {
+		this.client = new Socket(address, port);
 
 		final BufferedImage cursorImg = ImageIO.read(this.getClass().getResourceAsStream("/com/weiss/remote_connect/resources/cursor-24.png"));
 		
@@ -51,7 +51,6 @@ public class RemoteClient extends JFrame {
 			@Override
 			protected void paintComponent(Graphics g) {
 				super.paintComponent(g);
-				g.drawString("Hello " + System.currentTimeMillis(), 20, 20);
 				if (RemoteClient.this.currentFrame != null) {
 					g.drawImage(RemoteClient.this.currentFrame, 0, 0, null);
 				}

@@ -63,7 +63,7 @@ public class ChatWindow extends JPanel {
 		try {
 			this.sendButton = new JLabel(
 					new ImageIcon(ImageIO.read(this.getClass().getResourceAsStream(
-							"/com/shenzai/chat_client/resources/send_button.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
+							"/com/weiss/chat_client/resources/send_button.png")).getScaledInstance(16, 16, Image.SCALE_SMOOTH)));
 		} catch (IOException e) {
 			Log.err("Error reading send_button.png");
 			this.sendButton = new JLabel(">");

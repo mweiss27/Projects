@@ -1,41 +1,29 @@
-package com.weiss.chat_client.ui;
+package com.weiss.remote_connect.ui;
 
 import java.awt.CardLayout;
-import java.io.IOException;
 
-import javax.imageio.ImageIO;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.WindowConstants;
 
-import com.weiss.chat_client.ui.cards.ChatWindow;
-import com.weiss.chat_client.ui.cards.LoginScreen;
 import com.weiss.util.SwingUtil;
 
-public class ChatClientUI extends JFrame {
+public class RemoteConnectUI extends JFrame {
 
 	public final JPanel container;
 	public final LoginScreen loginScreen;
-	public final ChatWindow chatWindow;
 	
 	public static final String LOGIN_CARD = "login";
 	public static final String CHAT_ROOM_CARD = "chat";
 	
-	public ChatClientUI() {
-		super("Shenzai's Chat Client");
-		try {
-			this.setIconImage(ImageIO.read(ChatClientUI.class.getResourceAsStream("/com/weiss/chat_client/resources/chat_bubble.png")));
-		} catch (IOException e) {
-			System.err.println("Error reading chat_bubble.png");
-		}
+	public RemoteConnectUI() {
+		super("Shenzai's Remote Desktop");
 
 		this.container = new JPanel(new CardLayout());
 		
 		this.loginScreen = new LoginScreen();
-		this.chatWindow = new ChatWindow();
 		
 		this.container.add(this.loginScreen, LOGIN_CARD);
-		this.container.add(this.chatWindow, CHAT_ROOM_CARD);
 
 		SwingUtil.getCardLayout(this.container).show(this.container, LOGIN_CARD);
 		
