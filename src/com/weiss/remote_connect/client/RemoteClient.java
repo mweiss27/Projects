@@ -32,6 +32,7 @@ import com.weiss.remote_connect.packets.Packet;
 import com.weiss.remote_connect.packets.mouse.MouseClickedPacket;
 import com.weiss.remote_connect.packets.mouse.MouseDraggedPacket;
 import com.weiss.remote_connect.packets.mouse.MouseEventPacket;
+import com.weiss.remote_connect.packets.mouse.MouseMovedPacket;
 
 public class RemoteClient extends JFrame {
 
@@ -86,7 +87,7 @@ public class RemoteClient extends JFrame {
 				});
 			}
 			
-			/*@Override
+			@Override
 			public void mouseMoved(MouseEvent e) {
 				et.execute(new Runnable() {
 					@Override
@@ -94,7 +95,7 @@ public class RemoteClient extends JFrame {
 						sendEvent(new MouseMovedPacket(e.getX(), e.getY()));
 					}
 				});
-			}*/
+			}
 			
 			private void sendEvent(final MouseEventPacket packet) {
 				try {
@@ -117,7 +118,7 @@ public class RemoteClient extends JFrame {
 		view.addMouseMotionListener(ma);
 		
 		this.setContentPane(view);
-		this.setLocation(Toolkit.getDefaultToolkit().getScreenSize().width, 0);
+		this.setLocationRelativeTo(null);
 		this.pack();
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 		this.setVisible(true);
