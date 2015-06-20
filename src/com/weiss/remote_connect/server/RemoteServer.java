@@ -5,6 +5,7 @@ import java.awt.MouseInfo;
 import java.awt.Point;
 import java.awt.Rectangle;
 import java.awt.Robot;
+import java.awt.event.MouseEvent;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
@@ -22,6 +23,7 @@ import java.util.concurrent.Future;
 import com.weiss.io.Log;
 import com.weiss.remote_connect.packets.FramePacket;
 import com.weiss.remote_connect.packets.Packet;
+import com.weiss.remote_connect.packets.mouse.MouseDraggedPacket;
 import com.weiss.remote_connect.packets.mouse.MouseEventPacket;
 import com.weiss.remote_connect.util.RemoteConnectConfig;
 
@@ -36,7 +38,8 @@ public class RemoteServer {
 	private Socket connectedClient;
 
 	private final Rectangle screen = new Rectangle(0, 0);
-
+	private MouseDraggedPacket lastScreenMovedEvent;
+	
 	private Point mouseLocation;
 	private Robot robot;
 	private BufferedImage screenCapture;
@@ -98,16 +101,34 @@ public class RemoteServer {
 											if (o instanceof MouseEventPacket) {
 												Log.info("We received a MouseEventPacket: " + o.toString());
 												final MouseEventPacket mouseEventPacket = (MouseEventPacket) o;
-												mouseEventPacket.handleEvent(RemoteServer.this.robot);
+												if (mouseEventPacket instanceof MouseDraggedPacket) {
+													final MouseDraggedPacket mdp = (MouseDraggedPacket) mouseEventPacket;
+													if (mdp.mouseButton == MouseEvent.BUTTON2) {
+														if (RemoteServer.this.lastScreenMovedEvent != null) {
+															final int dx = mdp.x - RemoteServer.this.lastScreenMovedEvent.x;
+															final int dy = mdp.y - RemoteServer.this.lastScreenMovedEvent.y;
+															final Point currentLoc = RemoteServer.this.screen.getLocation();
+															currentLoc.translate(dx, dy);
+															RemoteServer.this.screen.setLocation(currentLoc);
+														}
+														RemoteServer.this.lastScreenMovedEvent = mdp;
+													}
+													else {
+														mouseEventPacket.handleEvent(RemoteServer.this.robot);
+													}
+												}
+												else {
+													mouseEventPacket.handleEvent(RemoteServer.this.robot);
+												}
 											}
 											else {
 												Log.err("We received a Packet, but we don't recognize it: " + o.getClass());
 											}
 										} catch (Exception any) {
-											any.printStackTrace();
 										}
 
-									} while (!RemoteServer.this.server.isClosed());
+									} while (!connectedClient.isInputShutdown() && !RemoteServer.this.server.isClosed());
+									Log.err("[Server] Input thread stopped.");
 								} catch (final Exception any) {
 									any.printStackTrace();
 								}
@@ -133,7 +154,11 @@ public class RemoteServer {
 											writeOut.write(packet.getData());
 											System.gc();
 										}
+										else {
+											Log.err("[Server] connectedClient.closed or connectedClient.outputShutdown");
+										}
 									} while (!RemoteServer.this.server.isClosed());
+									Log.err("[Server] Output thread stopped.");
 								} catch (final Exception any) {
 									any.printStackTrace();
 								}

@@ -1,9 +1,8 @@
 package com.weiss.remote_connect.packets;
 
-import java.awt.Graphics2D;
+import java.awt.Graphics;
 import java.awt.Image;
 import java.awt.Point;
-import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -21,7 +20,7 @@ public class FramePacket extends Packet {
 	
 	static {
 		try {
-			cursorImage = ImageIO.read(FramePacket.class.getResourceAsStream("/com/weiss/remote_connect/mac_cursor.png"));
+			cursorImage = ImageIO.read(FramePacket.class.getResourceAsStream("/com/weiss/remote_connect/resources/mac_cursor.png")).getScaledInstance(24, 24, Image.SCALE_SMOOTH);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -33,7 +32,7 @@ public class FramePacket extends Packet {
 
 	public FramePacket(final BufferedImage frame, final Point mouseLocation) {
 		this.frame = frame;
-		final Graphics2D g = (Graphics2D) this.frame.getGraphics().create();
+		final Graphics g = this.frame.getGraphics().create();
 		g.drawImage(cursorImage, mouseLocation.x, mouseLocation.y, null);
 		g.dispose();
 		this.mouseLocation = mouseLocation;

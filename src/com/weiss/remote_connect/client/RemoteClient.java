@@ -58,7 +58,7 @@ public class RemoteClient extends JFrame {
 					g.drawImage(RemoteClient.this.currentFrame, 0, 0, null);
 				}
 				if (RemoteClient.this.mouseLocation != null) {
-					g.drawImage(cursorImg, RemoteClient.this.mouseLocation.x, RemoteClient.this.mouseLocation.y, null);
+					//g.drawImage(cursorImg, RemoteClient.this.mouseLocation.x, RemoteClient.this.mouseLocation.y, null);
 				}
 
 			}
@@ -84,7 +84,7 @@ public class RemoteClient extends JFrame {
 				et.execute(new Runnable() {
 					@Override
 					public void run() {
-						sendEvent(new MouseDraggedPacket(e.getX(), e.getY()));
+						sendEvent(new MouseDraggedPacket(e.getButton(), e.getX(), e.getY()));
 					}
 				});
 			}
@@ -127,63 +127,68 @@ public class RemoteClient extends JFrame {
 	}
 
 	public void start() {
-		try {
-			final Future<?> inputThread = this.exec.submit(new Runnable() {
-				@Override
-				public void run() {
+		Executors.newSingleThreadExecutor().execute(new Runnable() {
+			@Override
+			public void run() {
+				try {
+					final Future<?> inputThread = RemoteClient.this.exec.submit(new Runnable() {
+						@Override
+						public void run() {
 
-					try {
-						
-						final byte[] buffer = new byte[100 * 1024 * 1024];
-						final DataInputStream readIn = new DataInputStream(RemoteClient.this.client.getInputStream());
+							try {
+								
+								final byte[] buffer = new byte[100 * 1024 * 1024];
+								final DataInputStream readIn = new DataInputStream(RemoteClient.this.client.getInputStream());
 
-						do {
-							//System.out.println("Waiting for bytes");
-							final int len = readIn.readInt();
-							//System.out.println("Receiving " + len + " bytes");
-							readIn.readFully(buffer, 0, len);
-							final Object o = RemoteClient.this.deserialize(buffer);
+								do {
+									//System.out.println("Waiting for bytes");
+									final int len = readIn.readInt();
+									//System.out.println("Receiving " + len + " bytes");
+									readIn.readFully(buffer, 0, len);
+									final Object o = RemoteClient.this.deserialize(buffer);
 
-							if (o == null) {
-								Log.err("We received a null object.");
-								continue;
-							}
-
-							if (!(o instanceof Packet)) {
-								Log.err("We received an object, but it isn't a Packet: " + o.getClass());
-								continue;
-							}
-
-							if (o instanceof FramePacket) {
-								final FramePacket framePacket = (FramePacket) o;
-								final ByteArrayInputStream bIn = new ByteArrayInputStream(framePacket.frameBytes);
-								RemoteClient.this.currentFrame = ImageIO.read(bIn);
-								RemoteClient.this.mouseLocation = framePacket.mouseLocation;
-								SwingUtilities.invokeLater(new Runnable() {
-									@Override
-									public void run() {
-										RemoteClient.this.getContentPane().repaint();
+									if (o == null) {
+										Log.err("We received a null object.");
+										continue;
 									}
-								});
-							}
-							else {
-								Log.err("We received a Packet, but we don't recognize it: " + o.getClass());
-							}
 
-							System.gc();
+									if (!(o instanceof Packet)) {
+										Log.err("We received an object, but it isn't a Packet: " + o.getClass());
+										continue;
+									}
 
-						} while (!RemoteClient.this.client.isClosed());
-					} catch (final Exception any) {
-						any.printStackTrace();
-					}
+									if (o instanceof FramePacket) {
+										final FramePacket framePacket = (FramePacket) o;
+										final ByteArrayInputStream bIn = new ByteArrayInputStream(framePacket.frameBytes);
+										RemoteClient.this.currentFrame = ImageIO.read(bIn);
+										RemoteClient.this.mouseLocation = framePacket.mouseLocation;
+										SwingUtilities.invokeLater(new Runnable() {
+											@Override
+											public void run() {
+												RemoteClient.this.getContentPane().repaint();
+											}
+										});
+									}
+									else {
+										Log.err("We received a Packet, but we don't recognize it: " + o.getClass());
+									}
+
+									System.gc();
+
+								} while (!RemoteClient.this.client.isClosed());
+							} catch (final Exception any) {
+								any.printStackTrace();
+							}
+						}
+					});
+
+					inputThread.get();
+
+				} catch (final Exception e) {
+					e.printStackTrace();
 				}
-			});
-
-			inputThread.get();
-
-		} catch (final Exception e) {
-			e.printStackTrace();
-		}
+			}
+		});
 	}
 
 	private synchronized Object deserialize(final byte[] bytes) throws IOException, ClassNotFoundException {

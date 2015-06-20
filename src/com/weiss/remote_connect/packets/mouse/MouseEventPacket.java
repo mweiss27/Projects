@@ -10,7 +10,7 @@ public abstract class MouseEventPacket extends Packet {
 
 	public final MouseEventType mouseEventType;
 	
-	protected final int x, y;
+	public final int x, y;
 	
 	public MouseEventPacket(final MouseEventType type, final int x, final int y) {
 		this.mouseEventType = type;

@@ -6,8 +6,11 @@ import java.awt.event.MouseEvent;
 
 public class MouseDraggedPacket extends MouseEventPacket {
 
-	public MouseDraggedPacket(final int x, final int y) {
+	public final int mouseButton;
+	
+	public MouseDraggedPacket(final int mouseButton, final int x, final int y) {
 		super(MouseEventType.MOUSE_DRAGGED, x, y);
+		this.mouseButton = mouseButton;
 	}
 
 	@Override
