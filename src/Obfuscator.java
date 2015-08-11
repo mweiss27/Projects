@@ -11,18 +11,17 @@ public class Obfuscator {
 
 	private static Pattern simpleStringPattern = Pattern.compile("(\".*?\")");
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 
-		final File f = new File("D:\\Users\\Matt\\Desktop\\HFC WeakAuras\\Archimonde\\Init.lua");
-		final File f2 = new File("D:\\Users\\Matt\\Desktop\\HFC WeakAuras\\Archimonde\\Trigger1.lua");
-		final File f3 = new File("D:\\Users\\Matt\\Desktop\\HFC WeakAuras\\Archimonde\\Trigger2.lua");
-		final File f4 = new File("D:\\Users\\Matt\\Desktop\\HFC WeakAuras\\Archimonde\\Untrigger.lua");
+		final File f = new File("lib/Init.lua");
+		final File f2 = new File("lib/Trigger1.lua");
+		final File f3 = new File("lib/Trigger2.lua");
+		final File f4 = new File("lib/Untrigger.lua");
 
-		try {
-			obfuscate(f, f2, f3, f4);
-		} catch (IOException e) {
-			e.printStackTrace();
-		}
+		String s1 = "[\"WARRIOR\"] = { 0, 0.125, 0, 0.25 },";
+		//System.out.println(s1.replaceAll("\"WARRIOR\"", "REPLACED"));
+
+		obfuscate(f, f2, f3, f4);
 
 	}
 
@@ -36,6 +35,7 @@ public class Obfuscator {
 
 			final Pattern variable = Pattern.compile("WA_.*?[\\s\\(\\[:\\.]");
 			for (String line : s.split("\n")) {
+				String before = new String(line);
 				final Matcher stringMatcher = simpleStringPattern.matcher(line);
 				boolean matched = false;
 				String str = "";
@@ -44,10 +44,15 @@ public class Obfuscator {
 					match = stringMatcher.group();
 					match = match.replaceAll("[\"]", "");
 					if (match.length() > 0) {
-						System.out.print(match + " ");
+						match = "\"" + match + "\"";
+						//System.out.println(match);
+
 						String replaced = "WA_stringDecode(";
 						boolean comma = false;
 						for (final char c : match.toCharArray()) {
+							if (c == '"') {
+								continue;
+							}
 							if (comma) {
 								replaced += ", ";
 							}
@@ -55,9 +60,11 @@ public class Obfuscator {
 							comma = true;
 						}
 						replaced += ")";
-						System.out.println(replaced);
-						line = line.replaceAll("\"" + match + "\"", replaced);
-						System.out.print(line);
+
+						//System.out.println(replaced);
+						System.out.println(line);
+						System.out.print("Replacing:\n\t" +  match + "\nwith\n\t" + replaced + "\n");
+						line = line.replaceAll(match, replaced);
 					}
 					matched = true;
 				}
@@ -71,7 +78,9 @@ public class Obfuscator {
 						variables.add(match.replaceAll("[^a-zA-Z_]", ""));
 					}
 				}
+				s = s.replace(before, line);
 			}
+			FileUtils.writeStringToFile(file, s);
 		}
 
 		for (final File file : f) {

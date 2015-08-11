@@ -1,5 +1,5 @@
 function(event, ...)
-	if event == "COMBAT_LOG_EVENT_UNFILTERED" then
+	if event == ww(34, 67, 79, 77, 66, 65, 84, 95, 76, 79, 71, 95, 69, 86, 69, 78, 84, 95, 85, 78, 70, 73, 76, 84, 69, 82, 69, 68, 34) then
 		local _, message, _, _, sourceName, _, _, _, destName, _, _, spellId, spellName = ...
 		
 		local testing = false
@@ -10,7 +10,7 @@ function(event, ...)
 		end
 		
 		if spellId and spellId == netherBanishId then
-			if message and message == "SPELL_AURA_APPLIED" then
+			if message and message == ww(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 65, 80, 80, 76, 73, 69, 68, 34) then
 				return true
 			end
 			
@@ -35,7 +35,7 @@ function(event, ...)
 		end
 		
 		if not ret then
-			ll_setRange(40)
+			mm_setRange(40)
 		end
 		if not ret then
 			y()

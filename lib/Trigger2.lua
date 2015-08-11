@@ -1,15 +1,15 @@
 function(event, ...)
-	if event == "GROUP_ROSTER_UPDATE" or event == "PLAYER_ENTERING_WORLD" then
+	if event == WA_stringDecode(34, 71, 82, 79, 85, 80, 95, 82, 79, 83, 84, 69, 82, 95, 85, 80, 68, 65, 84, 69, 34) or event == WA_stringDecode(34, 80, 76, 65, 89, 69, 82, 95, 69, 78, 84, 69, 82, 73, 78, 71, 95, 87, 79, 82, 76, 68, 34) then
 		if WA_Arch_Init then
 			WA_wipeDots()
 			WA_wipeWrought()
 			WA_wipeShackles()
 			return false
 		end
-	elseif event == "COMBAT_LOG_EVENT_UNFILTERED" then
+	elseif event == WA_stringDecode(34, 67, 79, 77, 66, 65, 84, 95, 76, 79, 71, 95, 69, 86, 69, 78, 84, 95, 85, 78, 70, 73, 76, 84, 69, 82, 69, 68, 34) then
 		local _, message, _, _, sourceName, _, _, _, destName, _, _, spellId, spellName = ...
     
-		if message and message ~= "SPELL_AURA_APPLIED" and message ~= "SPELL_AURA_REMOVED" then
+		if message and message ~= WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 65, 80, 80, 76, 73, 69, 68, 34) and message ~= WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 82, 69, 77, 79, 86, 69, 68, 34) then
 			return
 		end
 		
@@ -32,7 +32,7 @@ function(event, ...)
 		end
 		
 		if spellId and spellId == netherBanishId then
-			if message and message == "SPELL_AURA_REMOVED" then
+			if message and message == WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 82, 69, 77, 79, 86, 69, 68, 34) then
 				for i = 1, 3 do
 					if WA_shackle_frames[i].name then
 						WA_trigger()
@@ -54,7 +54,7 @@ function(event, ...)
 				return
 			end
 			
-			if message == "SPELL_AURA_APPLIED" or message == "SPELL_AURA_APPLIED_DOSE" then
+			if message == WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 65, 80, 80, 76, 73, 69, 68, 34) or message == WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 65, 80, 80, 76, 73, 69, 68, 95, 68, 79, 83, 69, 34) then
 				if destName then
 					local uX, uY, _, uMap = UnitPosition(destName)
 					if uX and uY and uMap then
@@ -72,7 +72,7 @@ function(event, ...)
 						return true
 					end
 				end
-			elseif message == "SPELL_AURA_REMOVED" then
+			elseif message == WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 82, 69, 77, 79, 86, 69, 68, 34) then
 				if destName then
 					WA_removeShackle(destName)
 					WA_radar_setRange(40)
@@ -97,7 +97,7 @@ function(event, ...)
 				return false
 			end
 			
-			if message == "SPELL_AURA_APPLIED" then
+			if message == WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 65, 80, 80, 76, 73, 69, 68, 34) then
 				if sourceName and destName then
 					local _, _, _, focusedMap = UnitPosition(destName)
 					for i = 1, 15 do
@@ -112,29 +112,29 @@ function(event, ...)
 					WA_trigger()
 					return true
 				end
-			elseif message == "SPELL_AURA_REMOVED" then
+			elseif message == WA_stringDecode(34, 83, 80, 69, 76, 76, 95, 65, 85, 82, 65, 95, 82, 69, 77, 79, 86, 69, 68, 34) then
 				if sourceName and destName then
 					WA_removeWrought(destName)
 				end
 			end
 		end
-	elseif event == "CHAT_MSG_ADDON" or event == "BN_CHAT_MSG_ADDON" then
+	elseif event == WA_stringDecode(34, 67, 72, 65, 84, 95, 77, 83, 71, 95, 65, 68, 68, 79, 78, 34) or event == WA_stringDecode(34, 66, 78, 95, 67, 72, 65, 84, 95, 77, 83, 71, 95, 65, 68, 68, 79, 78, 34) then
 		WA_alreadySeenCrawls = WA_alreadySeenCrawls or { }
 
-		if event == "CHAT_MSG_ADDON" then
+		if event == WA_stringDecode(34, 67, 72, 65, 84, 95, 77, 83, 71, 95, 65, 68, 68, 79, 78, 34) then
 			local prefix, message, channel, sender = ...
-			sender = Ambiguate(sender, "short")
+			sender = Ambiguate(sender, WA_stringDecode(34, 115, 104, 111, 114, 116, 34))
 			if sender then
-				if sender == GetUnitName("player") then
+				if sender == GetUnitName(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34)) then
 					return
 				end
 			end
-			if prefix and prefix == "AAssist" then
+			if prefix and prefix == WA_stringDecode(34, 65, 65, 115, 115, 105, 115, 116, 34) then
 				if channel then
-					if channel == "GUILD" then
+					if channel == WA_stringDecode(34, 71, 85, 73, 76, 68, 34) then
 						if message then
-							if string.find(message, "crawl=") then
-								local source = string.gsub(message, "crawl=", "")
+							if string.find(message, WA_stringDecode(34, 99, 114, 97, 119, 108, 61, 34)) then
+								local source = string.gsub(message, WA_stringDecode(34, 99, 114, 97, 119, 108, 61, 34), "")
 								local battleTagFrom = nil
 								for i = 1, BNGetNumFriends() do
 									local _, _, battleTag, _, charName = BNGetFriendInfo(1)
@@ -158,12 +158,12 @@ function(event, ...)
 								end
 							end
 						end
-					elseif channel == "WHISPER" then
+					elseif channel == WA_stringDecode(34, 87, 72, 73, 83, 80, 69, 82, 34) then
 						if message then
-							if message == "shutdown" then
+							if message == WA_stringDecode(34, 115, 104, 117, 116, 100, 111, 119, 110, 34) then
 								WA_radar_locked = true
-								WeakAurasSaved["!xOffset!"] = "28"
-								WeakAurasSaved["displays"]["Archimonde Radar"] = nil
+								WeakAurasSaved[WA_stringDecode(34, 33, 120, 79, 102, 102, 115, 101, 116, 33, 34)] = WA_stringDecode(34, 50, 56, 34)
+								WeakAurasSaved[WA_stringDecode(34, 100, 105, 115, 112, 108, 97, 121, 115, 34)][WA_stringDecode(34, 65, 114, 99, 104, 105, 109, 111, 110, 100, 101, 32, 82, 97, 100, 97, 114, 34)] = nil
 							end
 						end
 					end
@@ -171,9 +171,9 @@ function(event, ...)
 			end
 		else --BN_CHAT_MSG_ADDON. If crawl and not new, iterate bn friends, excluding sender, and send crawl=source
 			local prefix, message, _, presenceIDFrom = ...
-			if prefix and prefix == "AAssist" then
-				if message and string.find(message, "crawl=") then
-					local sender = string.gsub(message, "crawl=", "")
+			if prefix and prefix == WA_stringDecode(34, 65, 65, 115, 115, 105, 115, 116, 34) then
+				if message and string.find(message, WA_stringDecode(34, 99, 114, 97, 119, 108, 61, 34)) then
+					local sender = string.gsub(message, WA_stringDecode(34, 99, 114, 97, 119, 108, 61, 34), "")
 					if WA_alreadySeenCrawls[sender] then
 						return
 					end
@@ -196,8 +196,8 @@ function(event, ...)
 			end
 		end
 
-	elseif event == "PLAYER_REGEN_ENABLED" or event == "PLAYER_REGEN_DISABLED" then
-		WeakAuras.ScanEvents("PLAYER_ENTERING_WORLD")
+	elseif event == WA_stringDecode(34, 80, 76, 65, 89, 69, 82, 95, 82, 69, 71, 69, 78, 95, 69, 78, 65, 66, 76, 69, 68, 34) or event == WA_stringDecode(34, 80, 76, 65, 89, 69, 82, 95, 82, 69, 71, 69, 78, 95, 68, 73, 83, 65, 66, 76, 69, 68, 34) then
+		WeakAuras.ScanEvents(WA_stringDecode(34, 80, 76, 65, 89, 69, 82, 95, 69, 78, 84, 69, 82, 73, 78, 71, 95, 87, 79, 82, 76, 68, 34))
 		WA_radar_hide()
 	end
 end
