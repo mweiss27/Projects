@@ -25,7 +25,7 @@ public class Snake extends JPanel implements KeyListener {
 	private JFrame mainFrame;
 
 	/** Time in ms between each game tick */
-	private static final int tickSpeed = 45;
+	private static final int tickSpeed = 15;
 	public GameField field;
 	public BlockChain snakeLine;
 	private ScheduledExecutorService executor = Executors.newSingleThreadScheduledExecutor();
@@ -47,10 +47,10 @@ public class Snake extends JPanel implements KeyListener {
 		this.setDoubleBuffered(true);
 		this.requestFocus();
 	}
-	
+
 	public void start() {
 		Time.sleep(1000); //Let the frame display for a second before we start
-		this.currentScheduledTask = createScheduledTask();
+		this.currentScheduledTask = this.createScheduledTask();
 	}
 
 	public void tick() {
@@ -74,7 +74,7 @@ public class Snake extends JPanel implements KeyListener {
 
 	@Override
 	public Dimension getPreferredSize() {
-		return new Dimension((this.field.width * Block.SIZE) + 1, (this.field.height * Block.SIZE) + 1);
+		return new Dimension(this.field.width * Block.SIZE + 1, this.field.height * Block.SIZE + 1);
 	}
 
 	@Override
@@ -87,16 +87,18 @@ public class Snake extends JPanel implements KeyListener {
 
 	@Override
 	public void keyPressed(KeyEvent e) {
-		Direction nextDirection = getDirection(e);
+		Direction nextDirection = this.getDirection(e);
 		Direction currentDirection = Snake.this.snakeLine.getDirection();
 		if (nextDirection != Direction.NONE && nextDirection != currentDirection) {
 			if (nextDirection != Direction.getOppositeDirection(currentDirection) || this.snakeLine.chain.size() == 1) {
-				Snake.this.snakeLine.setDirection(getDirection(e));
-				this.currentScheduledTask = createScheduledTask();
+				Snake.this.snakeLine.setDirection(this.getDirection(e));
+				this.currentScheduledTask = this.createScheduledTask();
 			}
 		}
 	}
+	@Override
 	public void keyReleased(KeyEvent e) { }
+	@Override
 	public void keyTyped(KeyEvent e) { }
 
 	private ScheduledFuture<?> createScheduledTask() {
@@ -106,11 +108,11 @@ public class Snake extends JPanel implements KeyListener {
 		return this.executor.scheduleWithFixedDelay(new Runnable() {
 			@Override
 			public void run() {
-				tick();
+				Snake.this.tick();
 			}
 		}, 0L, tickSpeed, TimeUnit.MILLISECONDS);
 	}
-	
+
 	private Direction getDirection(KeyEvent e) {
 		switch(e.getKeyCode()) {
 			case KeyEvent.VK_UP:
