@@ -1,10 +1,11 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -13,7 +14,7 @@ import org.apache.commons.io.FileUtils;
 public class Obfuscator {
 
 	private static Pattern simpleStringPattern = Pattern.compile("(\".*?\")");
-	private static Pattern variablePattern = Pattern.compile("WA_.*?(?=[^a-zA-Z])");
+	private static Pattern variablePattern = Pattern.compile("WA_.*?(?=[^_a-zA-Z])");
 
 	public static void main(String[] args) {
 
@@ -30,7 +31,14 @@ public class Obfuscator {
 		//System.out.println(m.find());
 		//System.out.println(m.group());
 
-		final String s1 = "WA_testing_trigger";
+		final String s1 = "\"PLAYER_ENTERING_WORLD\"";
+		//System.out.println(s1.replaceAll("\"PLAYER_ENTERING_WORLD\"", "replaced"));
+
+		//		final Pattern variable = Pattern.compile("WA_.*?(?=[\\s\\(\\[:\\.])");
+		//		Matcher mm = variable.matcher("WA_circle:SetPoint(\"CENTER\", WA_radar_frame, \"CENTER\")");
+		//		while (mm.find()) {
+		//			System.out.println(mm.group());
+		//		}
 
 		try {
 			obfuscate2(f, f2, f3, f4);
@@ -52,17 +60,46 @@ public class Obfuscator {
 
 			String s = FileUtils.readFileToString(toUse);
 			for (String line : s.split("\n")) {
-				final Matcher m = variablePattern.matcher(line);
+
+
+				Matcher m = simpleStringPattern.matcher(line);
+				while (m.find()) {
+					String match = m.group();
+					String replace = "WA_decodeString(";
+					boolean comma = false;
+					for (char c : match.toCharArray()) {
+						if (c == '"') {
+							continue;
+						}
+						if (comma) {
+							replace += ", ";
+						}
+						replace += (int) c;
+						comma = true;
+					}
+					replace += ")";
+					replace = replace.replaceAll("92, 92", "92");
+					match = match.replaceAll("\\\\\\\\", "\\\\\\\\\\\\\\\\");
+					//System.out.println("Replacing\n\t" + match + "\nwith\n\t" + replace);
+					line = line.replaceAll(match, replace);
+					s = s.replaceAll(match, replace);
+				}
+
+
+				m = variablePattern.matcher(line);
 				while (m.find()) {
 					final String match = m.group();
 					variables.add(match);
 				}
 			}
+			FileUtils.writeStringToFile(toUse, s);
 		}
 
-		final Map<String, String> uuidMap = new HashMap<String ,String>();
+		String currentVar = "a";
+		final Map<String, String> varMap = new HashMap<String, String>();
 		for (final String var : variables) {
-			uuidMap.put(var, "v" + String.valueOf(UUID.randomUUID()).replaceAll("\\-", "_"));
+			varMap.put(var, "ob_" + currentVar);
+			currentVar = increment(currentVar);
 		}
 
 		for (int i = 0; i < f.length; i++) {
@@ -73,10 +110,14 @@ public class Obfuscator {
 
 			String s = FileUtils.readFileToString(toUse);
 			for (final String var : variables) {
-				s = s.replaceAll(var, uuidMap.get(var));
+				s = s.replaceAll(var, varMap.get(var));
 			}
 			System.out.println(file.getName());
 			System.out.println(Squisher.squish(s));
+		}
+
+		for (final String var : variables) {
+			System.out.println(varMap.get(var) + " = " + var);
 		}
 
 	}
@@ -95,7 +136,6 @@ public class Obfuscator {
 
 			final Pattern variable = Pattern.compile("WA_.*?(?=[\\s\\(\\[:\\.])");
 			for (String line : s.split("\n")) {
-				line = line.replaceAll("\\\\", "\\\\");
 				String before = new String(line);
 				final Matcher stringMatcher = simpleStringPattern.matcher(line);
 				boolean matched = false;
@@ -168,6 +208,37 @@ public class Obfuscator {
 			FileUtils.writeStringToFile(new File(file.getParentFile(), file.getName().replace(".lua", "") + "_OB.lua"), contents);
 			System.out.println();
 		}
+	}
+
+	private static String increment(String var) {
+
+		List<String> tokens = Arrays.asList(var.split("|"));
+
+		boolean allZ = true;
+		for (int i = tokens.size() - 1; i >= 0; i--) {
+			char c = tokens.get(i).charAt(0);
+			if (c < 'z') {
+				c++;
+				tokens.set(i, ""+c);
+				allZ = false;
+				break;
+			}
+		}
+		if (allZ) {
+			var = "";
+			for (int i = 0; i < tokens.size(); i++) {
+				var += "a";
+			}
+			var += "a";
+		}
+		else {
+			var = "";
+			for (int i = 0; i < tokens.size(); i++) {
+				var += tokens.get(i);
+			}
+		}
+
+		return var;
 	}
 
 
