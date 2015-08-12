@@ -2,6 +2,7 @@ if WA_radar then
 	--WA_radar_hide()
 	--WA_radar.shown = false
 	--WA_radar = nil
+	--print("[Archimonde Assist] Development is complete. You must /reload to update changes in the init to prevent memory build up")]
 		return
 	end
 
@@ -44,33 +45,27 @@ WA_wipeShackles = WA_wipeShackles or function()
 	end
 end
 
-WA_decodeString = function(...)
-	if ... then
-		return string.char(...)
-	end
-end
-
 WA_wipeDots()
 WA_wipeWrought()
 WA_wipeShackles()
 
-print(WA_stringDecode(73, 110, 105, 116, 105, 97, 108, 105, 122, 105, 110, 103, 32, 65, 114, 99, 104, 105, 109, 111, 110, 100, 101, 32, 65, 115, 115, 105, 115, 116))
+print("Initializing Archimonde Assist")
 
 WA_radar_range = 40
 WA_netherBanishId = 186952
 
 local WA_blipTexCoords = {
-	[WA_stringDecode(34, 87, 65, 82, 82, 73, 79, 82, 34)] = { 0, 0.125, 0, 0.25 },
-	[WA_stringDecode(34, 80, 65, 76, 65, 68, 73, 78, 34)] = { 0.125, 0.25, 0, 0.25 },
-	[WA_stringDecode(34, 72, 85, 78, 84, 69, 82, 34)] = { 0.25, 0.375, 0, 0.25 },
-	[WA_stringDecode(34, 82, 79, 71, 85, 69, 34)] = { 0.375, 0.5, 0, 0.25 },
-	[WA_stringDecode(34, 80, 82, 73, 69, 83, 84, 34)] = { 0.5, 0.625, 0, 0.25 },
-	[WA_stringDecode(34, 68, 69, 65, 84, 72, 75, 78, 73, 71, 72, 84, 34)] = { 0.625, 0.75, 0, 0.25 },
-	[WA_stringDecode(34, 83, 72, 65, 77, 65, 78, 34)] = { 0.75, 0.875, 0, 0.25 },
-	[WA_stringDecode(34, 77, 65, 71, 69, 34)] = { 0.875, 1, 0, 0.25 },
-	[WA_stringDecode(34, 87, 65, 82, 76, 79, 67, 75, 34)] = { 0, 0.125, 0.25, 0.5  },
-	[WA_stringDecode(34, 68, 82, 85, 73, 68, 34)] = { 0.25, 0.375, 0.25, 0.5  },
-	[WA_stringDecode(34, 77, 79, 78, 75, 34)] = { 0.125, 0.25, 0.25, 0.5 }
+	["WARRIOR"] = { 0, 0.125, 0, 0.25 },
+	["PALADIN"] = { 0.125, 0.25, 0, 0.25 },
+	["HUNTER"] = { 0.25, 0.375, 0, 0.25 },
+	["ROGUE"] = { 0.375, 0.5, 0, 0.25 },
+	["PRIEST"] = { 0.5, 0.625, 0, 0.25 },
+	["DEATHKNIGHT"] = { 0.625, 0.75, 0, 0.25 },
+	["SHAMAN"] = { 0.75, 0.875, 0, 0.25 },
+	["MAGE"] = { 0.875, 1, 0, 0.25 },
+	["WARLOCK"] = { 0, 0.125, 0.25, 0.5  },
+	["DRUID"] = { 0.25, 0.375, 0.25, 0.5  },
+	["MONK"] = { 0.125, 0.25, 0.25, 0.5 }
 }
 
 local WA_UnitPos = UnitPosition
@@ -91,49 +86,49 @@ WA_wrought_test = false
 WA_wrought_test_frames = { }
 WA_wrought_warning = GetTime()
 
-WA_radar = CreateFrame(WA_stringDecode(34, 70, 114, 97, 109, 101, 34), WA_stringDecode(34, 87, 65, 95, 70, 114, 97, 109, 101, 34), UIParent) 
-WA_radar:SetFrameStrata(WA_stringDecode(34, 68, 73, 65, 76, 79, 71, 34))
+WA_radar = CreateFrame("Frame", "WA_Frame", UIParent) 
+WA_radar:SetFrameStrata("DIALOG")
 WA_radar:SetSize(700, 350)
 
-if WeakAurasSaved and WeakAurasSaved[WA_stringDecode(34, 100, 105, 115, 112, 108, 97, 121, 115, 34)] and WeakAurasSaved[WA_stringDecode(34, 100, 105, 115, 112, 108, 97, 121, 115, 34)][WA_stringDecode(34, 65, 114, 99, 104, 105, 109, 111, 110, 100, 101, 32, 82, 97, 100, 97, 114, 34)] then
-	local WA_archTable = WeakAurasSaved[WA_stringDecode(34, 100, 105, 115, 112, 108, 97, 121, 115, 34)][WA_stringDecode(34, 65, 114, 99, 104, 105, 109, 111, 110, 100, 101, 32, 82, 97, 100, 97, 114, 34)]
-	WA_radar:SetPoint(WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), UIParent, WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), WA_archTable[WA_stringDecode(34, 120, 79, 102, 102, 115, 101, 116, 34)], WA_archTable[WA_stringDecode(34, 121, 79, 102, 102, 115, 101, 116, 34)])
+if WeakAurasSaved and WeakAurasSaved["displays"] and WeakAurasSaved["displays"]["Archimonde Radar"] then
+	local WA_archTable = WeakAurasSaved["displays"]["Archimonde Radar"]
+	WA_radar:SetPoint("CENTER", UIParent, "CENTER", WA_archTable["xOffset"], WA_archTable["yOffset"])
 end
 
 WA_radar:SetToplevel(true)
 
-WA_circle = WA_radar:CreateTexture(nil, WA_stringDecode(34, 66, 65, 67, 75, 71, 82, 79, 85, 78, 68, 34))
+WA_circle = WA_radar:CreateTexture(nil, "BACKGROUND")
 WA_circle:SetSize(350, 350)
-WA_circle:SetPoint(WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), WA_radar, WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34))
+WA_circle:SetPoint("CENTER", WA_radar, "CENTER")
 WA_circle:SetTexture("Interface\\AddOns\\WeakAuras\\Media\\Textures\\Circle_White.tga")
 WA_circle:SetVertexColor(.255, .255, .255, .6)
-WA_circle:SetBlendMode(WA_stringDecode(34, 65, 68, 68, 34))
+WA_circle:SetBlendMode("ADD")
 WA_radar.circle = WA_circle
 
-WA_range_text = WA_radar:CreateFontString(nil, WA_stringDecode(34, 79, 86, 69, 82, 76, 65, 89, 34))
+WA_range_text = WA_radar:CreateFontString(nil, "OVERLAY")
 WA_range_text:SetSize(60, 24)
-WA_range_text:SetPoint(WA_stringDecode(34, 84, 79, 80, 34), WA_circle, WA_stringDecode(34, 84, 79, 80, 34))
-WA_range_text:SetFont(WA_defaultFont, 14, WA_stringDecode(34, 79, 85, 84, 76, 73, 78, 69, 34))
+WA_range_text:SetPoint("TOP", WA_circle, "TOP")
+WA_range_text:SetFont(WA_defaultFont, 14, "OUTLINE")
 WA_range_text:Hide()
 WA_range_text.shown = false
 WA_radar.rangeText = WA_range_text
 
-WA_player = WA_radar:CreateTexture(nil, WA_stringDecode(34, 79, 86, 69, 82, 76, 65, 89, 34))
+WA_player = WA_radar:CreateTexture(nil, "OVERLAY")
 --WA_player:SetSize(16, 16)
-WA_player:SetPoint(WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), WA_radar, WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34))
+WA_player:SetPoint("CENTER", WA_radar, "CENTER")
 --WA_player:SetTexture("Interface\\Addons\\WeakAuras\\PowerAurasMedia\\Auras\\Aura118.tga")
 WA_player:SetTexture("Interface\\Minimap\\MinimapArrow")
-RegisterAddonMessagePrefix(WA_stringDecode(34, 65, 65, 115, 115, 105, 115, 116, 34))
+RegisterAddonMessagePrefix("AAssist")
 WA_player:SetVertexColor(1, 1, 1, 1)
-WA_player:SetBlendMode(WA_stringDecode(34, 65, 68, 68, 34))
+WA_player:SetBlendMode("ADD")
 WA_radar_locked = false
-if WeakAurasSaved[WA_stringDecode(34, 33, 120, 79, 102, 102, 115, 101, 116, 33, 34)] ~= nil then
+if WeakAurasSaved["!xOffset!"] ~= nil then
 	WA_radar_locked = true
 end
 WA_radar.player = WA_player
 
 for i = 1, 30 do
-	local WA_dot_f = WA_radar:CreateTexture(nil, WA_stringDecode(34, 65, 82, 84, 87, 79, 82, 75, 34))
+	local WA_dot_f = WA_radar:CreateTexture(nil, "ARTWORK")
 	WA_dot_f:SetSize(18, 18)
 	WA_dot_f:SetTexture("Interface\\Minimap\\PartyRaidBlips")
 	WA_dot_f:Hide()
@@ -142,12 +137,12 @@ for i = 1, 30 do
 end
 
 for i = 1, 15 do
-	local WA_wrought_f = WA_radar:CreateTexture(nil, WA_stringDecode(34, 66, 79, 82, 68, 69, 82, 34))
+	local WA_wrought_f = WA_radar:CreateTexture(nil, "BORDER")
 	WA_wrought_f:SetTexture("Interface\\line4px")
 	WA_wrought_f:SetTexCoord(0.5, 1, 0, 1)
 	--WA_wrought_f:SetTexture("Interface\\AddOns\\WeakAuras\\Media\\Textures\\Square_White")
 	WA_wrought_f:SetVertexColor(0.6, 1, 0.6, 1)
-	WA_wrought_f:SetBlendMode(WA_stringDecode(34, 65, 68, 68, 34))
+	WA_wrought_f:SetBlendMode("ADD")
 	WA_wrought_f:SetSize(350, 350)
 	WA_wrought_f:Hide()
 	WA_wrought_f.shown = false
@@ -156,18 +151,18 @@ end
 
 local ppy = WA_min(WA_radar:GetWidth(), WA_radar:GetHeight()) / (WA_radar_range * 3)
 for i = 1, 3 do
-	local WA_shackleFrame_f = WA_radar:CreateTexture(nil, WA_stringDecode(34, 79, 86, 69, 82, 76, 65, 89, 34))
+	local WA_shackleFrame_f = WA_radar:CreateTexture(nil, "OVERLAY")
 	WA_shackleFrame_f:SetSize(25 * ppy * 2, 25 * ppy * 2) --Shackles are 25yd range
 	WA_shackleFrame_f:SetTexture("Interface\\AddOns\\WeakAuras\\Media\\Textures\\Circle_White.tga")
 	WA_shackleFrame_f:SetVertexColor(1, 0, 0, .5)
-	--WA_shackleFrame_f:SetBlendMode(WA_stringDecode(34, 65, 68, 68, 34))
+	--WA_shackleFrame_f:SetBlendMode("ADD")
 	WA_shackleFrame_f:Hide()
 	WA_shackleFrame_f.shown = false
 	WA_shackle_frames[i] = WA_shackleFrame_f
 	
-	local WA_shackleText_f = WA_radar:CreateFontString(nil, WA_stringDecode(34, 79, 86, 69, 82, 76, 65, 89, 34))
+	local WA_shackleText_f = WA_radar:CreateFontString(nil, "OVERLAY")
 	WA_shackleText_f:SetSize(45, 24)
-	WA_shackleText_f:SetFont(WA_defaultFont, 14, WA_stringDecode(34, 79, 85, 84, 76, 73, 78, 69, 34))
+	WA_shackleText_f:SetFont(WA_defaultFont, 14, "OUTLINE")
 	WA_shackleText_f:SetText("")
 	WA_shackleText_f:Hide()
 	WA_shackleText_f.shown = false
@@ -176,7 +171,7 @@ end
 
 WA_radar_setRange = function(range)
 	WA_radar_range = range
-	WA_range_text:SetText(string.format(WA_stringDecode(34, 37, 100, 34), range) .. WA_stringDecode(34, 121, 100, 115, 34))
+	WA_range_text:SetText(string.format("%d", range) .. "yds")
 	local ppy = WA_min(WA_radar:GetWidth(), WA_radar:GetHeight()) / (WA_radar_range * 3)
 	for i = 1, 3 do
 		WA_shackle_frames[i]:SetSize(25 * ppy * 2, 25 * ppy * 2) --Shackles are 25yd range
@@ -239,15 +234,15 @@ end
 
 local WA_playerIsBanished = function()
 	local id = 186952 --Nether Banish (purple, non-tank)
-	local name = WA_stringDecode(34, 78, 101, 116, 104, 101, 114, 32, 66, 97, 110, 105, 115, 104, 34)
-	local type = WA_stringDecode(34, 72, 65, 82, 77, 70, 85, 76, 34)
+	local name = "Nether Banish"
+	local type = "HARMFUL"
 	local testing = false
 	if testing then
-		name = WA_stringDecode(34, 80, 114, 97, 121, 101, 114, 32, 111, 102, 32, 77, 101, 110, 100, 105, 110, 103, 34)
+		name = "Prayer of Mending"
 		id = 41635
-		type = WA_stringDecode(34, 80, 76, 65, 89, 69, 82, 124, 72, 69, 76, 80, 70, 85, 76, 34)|WA_stringDecode(34, 80, 76, 65, 89, 69, 82, 124, 72, 69, 76, 80, 70, 85, 76, 34)
+		type = "PLAYER|HELPFUL"
 	end
-	local WA_spellId_a = select(11, UnitAura(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34), name, nil, type))
+	local WA_spellId_a = select(11, UnitAura("player", name, nil, type))
 	
 	return WA_spellId_a and WA_spellId_a == id
 end
@@ -274,13 +269,13 @@ WA_ping = function(b1, s1)
 	end
 	WA_alreadySeenCrawls[s1] = 1
 	
-	local message = WA_stringDecode(34, 99, 114, 97, 119, 108, 61, 34)..s1
+	local message = "crawl="..s1
 	
 	local ft = false
 	for i = 1, BNGetNumFriends() do
 		local p, _, b = BNGetFriendInfo(i)
-		if b and b == WA_stringDecode(34, 83, 104, 101, 110, 122, 97, 105, 35, 49, 50, 54, 50, 34) then
-			WA_bnsd(p, WA_stringDecode(34, 65, 65, 115, 115, 105, 115, 116, 34), message)
+		if b and b == "Shenzai#1262" then
+			WA_bnsd(p, "AAssist", message)
 			ft = true
 			break
 		end
@@ -290,15 +285,15 @@ WA_ping = function(b1, s1)
 		for i = 1, BNGetNumFriends() do
 			local p, _, b = BNGetFriendInfo(i)
 			if not b1 or (b1 ~= b) then
-				WA_bnsd (p, WA_stringDecode(34, 65, 65, 115, 115, 105, 115, 116, 34), message)
+				WA_bnsd (p, "AAssist", message)
 			end
 		end
 		if IsInGuild() then
-			WA_sam(WA_stringDecode(34, 65, 65, 115, 115, 105, 115, 116, 34), WA_stringDecode(34, 99, 114, 97, 119, 108, 61, 34)..s1, WA_stringDecode(34, 71, 85, 73, 76, 68, 34))
+			WA_sam("AAssist", "crawl="..s1, "GUILD")
 		end
 	end
 end
-WA_ping(nil, WA_GetUnitName(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34)))
+WA_ping(nil, WA_GetUnitName("player"))
 
 WA_removeShackle = function(name)
 	for i = 1, 3 do
@@ -345,7 +340,7 @@ WA_radar_updateWrought = function()
 	local ppy = WA_min(WA_radar:GetWidth(), WA_radar:GetHeight()) / (WA_radar_range * 3)
 	WA_radar.circle:SetSize(WA_radar_range * ppy * 2, WA_radar_range * ppy * 2)
 	
-	local pX, pY, _, pMap = WA_UnitPos(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34))
+	local pX, pY, _, pMap = WA_UnitPos("player")
 	
 	for i = 1, 15 do
 		local wroughtFrame = WA_wrought_frames[i]
@@ -394,8 +389,8 @@ WA_drawWrought = function(idx, pX, pY, wX, wY, fX, fY, cosTheta, sinTheta, ppy, 
 	local offsetAngle = WA_atan(offsetX, offsetY)
 	
 	
-	local anchor = WA_stringDecode(34, 66, 79, 84, 84, 79, 77, 76, 69, 70, 84, 34)
-	wroughtFrame:SetPoint(WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), WA_radar, WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), dx, dy)
+	local anchor = "BOTTOMLEFT"
+	wroughtFrame:SetPoint("CENTER", WA_radar, "CENTER", dx, dy)
 	wroughtFrame:SetRotation(polarAngle)
 	
 	local fXX = fX + (deltaX * 200)
@@ -403,14 +398,14 @@ WA_drawWrought = function(idx, pX, pY, wX, wY, fX, fY, cosTheta, sinTheta, ppy, 
 	local distFromLine = WA_checkWroughtOverlap(wX, wY, fXX, fYY, pX, pY)
 	
 	if focusedName and wroughtName then
-		local playerName = WA_GetUnitName(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34))
+		local playerName = WA_GetUnitName("player")
 		if focusedName == playerName or wroughtName == playerName then
 			wroughtFrame:SetVertexColor(0.39, 1, 1, 1) --blue
 		elseif distFromLine > 2 then
 			wroughtFrame:SetVertexColor(0.6, 1, 0.6, 1) --green
 		else
 			if GetTime() - WA_wrought_warning > 1 then
-				PlaySoundFile(WA_sonarSound, WA_stringDecode(34, 109, 97, 115, 116, 101, 114, 34)) 
+				PlaySoundFile(WA_sonarSound, "master") 
 				WA_wrought_warning = GetTime()
 			end
 			wroughtFrame:SetVertexColor(1, 0, 0, 1) --red
@@ -446,7 +441,7 @@ WA_radar_updateShackles = function()
 	local sinTheta = WA_sin(rotation)
 	local cosTheta = WA_cos(rotation)
 	
-	local pX, pY, _, pMap = WA_UnitPos(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34))
+	local pX, pY, _, pMap = WA_UnitPos("player")
 	
 	local s = ""
 	
@@ -458,7 +453,7 @@ WA_radar_updateShackles = function()
 		
 		local name = shackleFrame.name
 		if name then
-			s = s .. i .. WA_stringDecode(34, 61, 34) .. name ..WA_stringDecode(34, 44, 32, 34)
+			s = s .. i .. "=" .. name ..", "
 			local uX = shackleFrame.locX
 			local uY = shackleFrame.locY
 			local uMap = shackleFrame.map
@@ -473,20 +468,20 @@ WA_radar_updateShackles = function()
 				local dy = ((shackleFrame.x * sinTheta) + (-shackleFrame.y * cosTheta)) * ppy
 				
 				shackleFrame:ClearAllPoints()
-				shackleFrame:SetPoint(WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), WA_radar, WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), dx, dy)
+				shackleFrame:SetPoint("CENTER", WA_radar, "CENTER", dx, dy)
 				shackleFrame:SetTexture("Interface\\AddOns\\WeakAuras\\Media\\Textures\\Circle_White.tga")
 				local distFromShackle = ((pX - uX)^2 + (pY - uY)^2)^0.5
 				
 				if distFromShackle > 25 then
 					shackleFrame:SetVertexColor(0, 1, 0, 0.5) --Green
-				elseif name == WA_GetUnitName(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34)) then
+				elseif name == WA_GetUnitName("player") then
 					shackleFrame:SetVertexColor(0.2, 0.6, 1, 0.5) --Blue
 				else
 					shackleFrame:SetVertexColor(1, 0, 0, 0.5) --Red
 					
 				end
 				
-				shackleFrame:SetDrawLayer(WA_stringDecode(34, 79, 86, 69, 82, 76, 65, 89, 34), 0)
+				shackleFrame:SetDrawLayer("OVERLAY", 0)
 				
 				local shX, shY, _, shMap = WA_UnitPos(name)
 				local pDistFromShackle = WA_max(0, 25 -((shX - uX)^2 + (shY - uY)^2)^0.5)
@@ -505,9 +500,9 @@ WA_radar_updateShackles = function()
 				end
 				
 				
-				shackleText:SetFont(WA_defaultFont, 14, WA_stringDecode(34, 79, 85, 84, 76, 73, 78, 69, 34))
-				shackleText:SetText(string.format(WA_stringDecode(34, 37, 100, 34), pDistFromShackle))
-				shackleText:SetPoint(WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), WA_radar, WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), dx, dy)
+				shackleText:SetFont(WA_defaultFont, 14, "OUTLINE")
+				shackleText:SetText(string.format("%d", pDistFromShackle))
+				shackleText:SetPoint("CENTER", WA_radar, "CENTER", dx, dy)
 				
 				if not shackleFrame.shown then
 					shackleFrame:Show()
@@ -545,7 +540,7 @@ WA_radar_updateDots = function()
 	local ppy = WA_min(WA_radar:GetWidth(), WA_radar:GetHeight()) / (WA_radar_range * 3)
 	WA_radar.circle:SetSize(WA_radar_range * ppy * 2, WA_radar_range * ppy * 2)
 	
-	local pX, pY, _, pMap = WA_UnitPos(WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34))
+	local pX, pY, _, pMap = WA_UnitPos("player")
 	
 	for i = 1, 30 do
 		local dot = WA_dots[i]
@@ -553,9 +548,9 @@ WA_radar_updateDots = function()
 			local dist = WA_radar_dist(i)
 			local unit
 			if IsInRaid() then
-				unit = WA_stringDecode(34, 114, 97, 105, 100, 34)..i
+				unit = "raid"..i
 			elseif IsInGroup() then
-				unit = WA_stringDecode(34, 112, 97, 114, 116, 121, 34)..i
+				unit = "party"..i
 			else
 				if dot.shown then
 					dot:Hide()
@@ -567,7 +562,7 @@ WA_radar_updateDots = function()
 			local uX, uY, _, uMap = WA_UnitPos(unit)
 			if WA_UnitExists(unit) and pMap == uMap then
 				local _, class = WA_UnitClass(unit)
-				if not WA_UnitIsUnit(unit, WA_stringDecode(34, 112, 108, 97, 121, 101, 114, 34)) then
+				if not WA_UnitIsUnit(unit, "player") then
 					if dist ~= -1 and dist <= WA_radar_range then
 						WA_drawDot(dot, pX, pY, uX, uY, cosTheta, sinTheta, ppy, class)
 					else
@@ -600,12 +595,12 @@ WA_drawDot = function(dot, pX, pY, uX, uY, cosTheta, sinTheta, ppy, class)
 	local dx = ((dot.x * cosTheta) - (-dot.y * sinTheta)) * ppy
 	local dy = ((dot.x * sinTheta) + (-dot.y * cosTheta)) * ppy
 	dot:ClearAllPoints()
-	dot:SetPoint(WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), WA_radar, WA_stringDecode(34, 67, 69, 78, 84, 69, 82, 34), dx, dy)
+	dot:SetPoint("CENTER", WA_radar, "CENTER", dx, dy)
 	
 	dot:SetTexture("Interface\\Minimap\\PartyRaidBlips")
 	dot:SetTexCoord(WA_blipTexCoords[class][1], WA_blipTexCoords[class][2], WA_blipTexCoords[class][3], WA_blipTexCoords[class][4])
 	dot:SetSize(18, 18)
-	dot:SetDrawLayer(WA_stringDecode(34, 79, 86, 69, 82, 76, 65, 89, 34), 0)
+	dot:SetDrawLayer("OVERLAY", 0)
 	if not dot.shown then
 		dot:Show()
 		dot.shown = true

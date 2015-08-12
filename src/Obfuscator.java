@@ -1,7 +1,10 @@
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -10,8 +13,9 @@ import org.apache.commons.io.FileUtils;
 public class Obfuscator {
 
 	private static Pattern simpleStringPattern = Pattern.compile("(\".*?\")");
+	private static Pattern variablePattern = Pattern.compile("WA_.*?(?=[^a-zA-Z])");
 
-	public static void main(String[] args) throws Exception {
+	public static void main(String[] args) {
 
 		final File parentDir = new File("D:\\Users\\Matt\\Desktop\\HFC WeakAuras\\Archimonde");
 		//final File parentDir = new File("lib");
@@ -21,23 +25,77 @@ public class Obfuscator {
 		final File f3 = new File(parentDir, "Trigger2.lua");
 		final File f4 = new File(parentDir, "Untrigger.lua");
 
-		String s1 = "[\"WARRIOR\"] = { 0, 0.125, 0, 0.25 },";
-		//System.out.println(s1.replaceAll("\"WARRIOR\"", "REPLACED"));
+		String line = "\"Interface\\Addons\\WeakAuras\\PowerAurasMedia\\Sounds\\sonar.ogg\"".replaceAll("\\\\", "\\\\\\\\");
+		Matcher m = simpleStringPattern.matcher(line);
+		//System.out.println(m.find());
+		//System.out.println(m.group());
 
-		obfuscate(f, f2, f3, f4);
+		final String s1 = "WA_testing_trigger";
+
+		try {
+			obfuscate2(f, f2, f3, f4);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+
+	}
+
+	private static void obfuscate2(final File... f) throws IOException {
+
+		final Set<String> variables = new HashSet<String>();
+
+		for (int i = 0; i < f.length; i++) {
+			final File file = f[i];
+			final File toUse = FileUtils.getFile(file.getParentFile(), "ob", file.getName());
+			FileUtils.copyFile(file, toUse);
+			f[i] = toUse;
+
+			String s = FileUtils.readFileToString(toUse);
+			for (String line : s.split("\n")) {
+				final Matcher m = variablePattern.matcher(line);
+				while (m.find()) {
+					final String match = m.group();
+					variables.add(match);
+				}
+			}
+		}
+
+		final Map<String, String> uuidMap = new HashMap<String ,String>();
+		for (final String var : variables) {
+			uuidMap.put(var, "v" + String.valueOf(UUID.randomUUID()).replaceAll("\\-", "_"));
+		}
+
+		for (int i = 0; i < f.length; i++) {
+			final File file = f[i];
+			final File toUse = FileUtils.getFile(file.getParentFile(), "ob", file.getName());
+			FileUtils.copyFile(file, toUse);
+			f[i] = toUse;
+
+			String s = FileUtils.readFileToString(toUse);
+			for (final String var : variables) {
+				s = s.replaceAll(var, uuidMap.get(var));
+			}
+			System.out.println(file.getName());
+			System.out.println(Squisher.squish(s));
+		}
 
 	}
 
 	private static void obfuscate(final File... f) throws IOException {
 
-
 		final Set<String> variables = new HashSet<String>();
 
-		for (final File file : f) {
-			String s = FileUtils.readFileToString(file);
+		for (int i = 0; i < f.length; i++) {
+			final File file = f[i];
+			final File toUse = FileUtils.getFile(file.getParentFile(), "ob", file.getName());
+			FileUtils.copyFile(file, toUse);
+			f[i] = toUse;
 
-			final Pattern variable = Pattern.compile("WA_.*?[\\s\\(\\[:\\.]");
+			String s = FileUtils.readFileToString(toUse);
+
+			final Pattern variable = Pattern.compile("WA_.*?(?=[\\s\\(\\[:\\.])");
 			for (String line : s.split("\n")) {
+				line = line.replaceAll("\\\\", "\\\\");
 				String before = new String(line);
 				final Matcher stringMatcher = simpleStringPattern.matcher(line);
 				boolean matched = false;
@@ -67,7 +125,7 @@ public class Obfuscator {
 						//System.out.println(replaced);
 						//System.out.println(line);
 						//System.out.print("Replacing:\n\t" +  match + "\nwith\n\t" + replaced + "\n");
-						line = line.replaceAll(match, replaced);
+						line = line.replaceAll(match, replaced.replaceAll("92, 92", "92"));
 					}
 					matched = true;
 				}
@@ -83,7 +141,7 @@ public class Obfuscator {
 				}
 				s = s.replace(before, line);
 			}
-			FileUtils.writeStringToFile(file, s);
+			FileUtils.writeStringToFile(toUse, s);
 		}
 
 		for (final File file : f) {
@@ -93,10 +151,10 @@ public class Obfuscator {
 
 			for (final String var : variables) {
 				String vToReplace = "";
-				for (int i = 0; i < count; i++) {
+				for (int j = 0; j < count; j++) {
 					vToReplace += v;
 				}
-				//System.out.println(vToReplace + " = " + var);
+				System.out.println(vToReplace + " = " + var);
 				contents = contents.replaceAll(var, vToReplace);
 				v++;
 				if (v > 'z') {
