@@ -13,10 +13,13 @@ public class Obfuscator {
 
 	public static void main(String[] args) throws Exception {
 
-		final File f = new File("lib/Init.lua");
-		final File f2 = new File("lib/Trigger1.lua");
-		final File f3 = new File("lib/Trigger2.lua");
-		final File f4 = new File("lib/Untrigger.lua");
+		final File parentDir = new File("D:\\Users\\Matt\\Desktop\\HFC WeakAuras\\Archimonde");
+		//final File parentDir = new File("lib");
+
+		final File f = new File(parentDir, "Init.lua");
+		final File f2 = new File(parentDir, "Trigger1.lua");
+		final File f3 = new File(parentDir, "Trigger2.lua");
+		final File f4 = new File(parentDir, "Untrigger.lua");
 
 		String s1 = "[\"WARRIOR\"] = { 0, 0.125, 0, 0.25 },";
 		//System.out.println(s1.replaceAll("\"WARRIOR\"", "REPLACED"));
@@ -62,8 +65,8 @@ public class Obfuscator {
 						replaced += ")";
 
 						//System.out.println(replaced);
-						System.out.println(line);
-						System.out.print("Replacing:\n\t" +  match + "\nwith\n\t" + replaced + "\n");
+						//System.out.println(line);
+						//System.out.print("Replacing:\n\t" +  match + "\nwith\n\t" + replaced + "\n");
 						line = line.replaceAll(match, replaced);
 					}
 					matched = true;
